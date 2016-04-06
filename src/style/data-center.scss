@@ -1,0 +1,40 @@
+//data center
+.ant-data-right{
+  .data-right-header{
+    margin:5% 5% 0 5%;
+    width: 90%;
+    height: 150px;
+    text-align: center;
+    line-height: 120px;
+    .div{
+      background-color: rgb(52, 73, 94);
+      color: #fff;
+      cursor: pointer;
+      &:hover{
+        background-color: #e44747;
+      }
+    }
+  }
+}
+.data-right-middle{
+  margin-top: 3rem;
+  .right-middle-bottom{
+    margin-top: 3rem;
+    text-align: center;
+    line-height: 1rem;
+  }
+  h3:hover{
+    color: #e44747;
+    cursor: pointer;
+  }
+}
+.triangle{
+  position: absolute;
+  width: 3em;
+  height: 3em;
+  background-color: rgb(52, 73, 94);
+  margin-top: -2em;
+  margin-left: 35%;
+  transform: rotate(45deg);
+  z-index: -1;
+}

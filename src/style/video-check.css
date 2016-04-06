@@ -1,0 +1,51 @@
+.video-check-header {
+  height: 5rem;
+  border-bottom: 1px solid gray;
+  margin-bottom: 2rem; }
+
+.video-check-left {
+  background-color: #0b97c4;
+  height: 50rem; }
+  .video-check-left .video-check-left-position {
+    border: 1px solid black;
+    height: 25rem; }
+    .video-check-left .video-check-left-position .video-check-left-position-opacity {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      line-height: 25rem;
+      background-color: rebeccapurple;
+      opacity: 0; }
+      .video-check-left .video-check-left-position .video-check-left-position-opacity:hover {
+        opacity: 0.7;
+        transition: opacity .5s; }
+
+.video-check-right {
+  height: 50rem; }
+  .video-check-right .video-check-right-m {
+    height: 42rem;
+    overflow-x: hidden !important; }
+    .video-check-right .video-check-right-m .video-check-right-comment {
+      height: 9rem;
+      margin-top: 1rem;
+      background-color: rgba(39, 174, 96, 0.5); }
+    .video-check-right .video-check-right-m .video-check-right-commentList {
+      height: 3rem;
+      line-height: 3rem;
+      text-align: center;
+      background-color: rgba(39, 174, 96, 0.7); }
+  .video-check-right .video-check-right-b {
+    margin-top: 1rem;
+    height: 5rem;
+    background-color: #CCCCCC; }
+    .video-check-right .video-check-right-b .video-check-right-b-l {
+      margin-top: 1rem;
+      margin-left: 1rem; }
+    .video-check-right .video-check-right-b .video-check-right-b-r {
+      background-color: lightgray;
+      height: 5rem;
+      text-align: center;
+      line-height: 5rem; }
+
+/*# sourceMappingURL=video-check.css.map */

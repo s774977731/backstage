@@ -1,0 +1,71 @@
+.new-article-header {
+  height: 80px; }
+  .new-article-header .article-header-input {
+    height: 40px;
+    background-color: #ededed;
+    color: grey;
+    font-size: larger; }
+
+.new-article-content {
+  height: 240px; }
+  .new-article-content .new-article-content-div-t .article-content-div-t-1 {
+    height: 200px;
+    width: 200px;
+    background-color: dimgray;
+    cursor: pointer;
+    overflow: hidden; }
+  .new-article-content .new-article-content-div-t .article-content-div-t-2 {
+    position: absolute;
+    margin-left: 9rem;
+    margin-top: -1rem;
+    text-align: center; }
+  .new-article-content .new-article-content-div-c {
+    margin-top: 50px; }
+  .new-article-content .new-article-content-div-b {
+    margin-top: 120px; }
+
+.new-article-footer {
+  height: 100px;
+  margin-top: 230px;
+  font-size: 1.2rem;
+  line-height: 40px;
+  color: #FFFFFF; }
+  .new-article-footer .new-article-footer-1 {
+    background-color: #ff6666;
+    color: #FFFFFF;
+    cursor: pointer; }
+  .new-article-footer .new-article-footer-2 {
+    background-color: #2b2e38;
+    color: #FFFFFF;
+    margin-top: -40px;
+    margin-left: 150px;
+    cursor: pointer; }
+  .new-article-footer .new-article-footer-3 {
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: -40px;
+    margin-left: 320px;
+    color: #000; }
+
+.button, .new-article-footer .new-article-footer-1, .new-article-footer .new-article-footer-2 {
+  width: 120px;
+  height: 40px; }
+
+.text-align, .new-article-footer .new-article-footer-1, .new-article-footer .new-article-footer-2 {
+  text-align: center; }
+
+.border-radius, .new-article-footer .new-article-footer-1, .new-article-footer .new-article-footer-2 {
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px; }
+
+.border-radius-boxImg, .new-article-content .new-article-content-div-t .article-content-div-t-1 {
+  -webkit-border-radius: 100px;
+  -moz-border-radius: 100px;
+  -ms-border-radius: 100px;
+  -o-border-radius: 100px;
+  border-radius: 100px; }
+
+/*# sourceMappingURL=new-article.css.map */
