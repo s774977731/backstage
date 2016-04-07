@@ -191,6 +191,7 @@ class Authority extends React.Component{
 
   render() {
     const {selectedRowKeys } = this.state;
+    const { getFieldProps } = this.props.form;
     // 通过 rowSelection 对象表明需要行选择
     const rowSelection = {
       selectedRowKeys,
@@ -208,31 +209,28 @@ class Authority extends React.Component{
                 <div className="Icon-demo-div" onClick={this.handleClickDelete}><Icon className="Icon-demo" type="delete"/></div>
               </Col>
               <Col span="4" offset="1">
-
                   <div className="right-header-left" onClick={this.handleClick}>
                     &nbsp;&nbsp;&nbsp;<Icon type="plus" />&nbsp;&nbsp;<span id="admin">添加管理员</span>
                   </div>
               </Col>
               {/*Group*/}
-              <div>
+              <Form onSubmit={this.handleSubmit} form={this.props.form}>
                 <Col span="1" offset="12">
                   <div className="right-header-right-m">
                     <Dropdown overlay={menu} trigger={['click']}>
                       <div className="ant-dropdown-link" href="#">
-                        全部 <Icon type="down" />
+                        全部 <Icon type="down"/>
                       </div>
                     </Dropdown>
                   </div>
                 </Col>
                 <Col span="3">
-                  <Input className="right-header-right-m-input" />
+                  <Input {...getFieldProps('key')} style={{height:'40px'}} />
                 </Col>
                 <Col span="2">
-                  <div className="right-header-right-r">
-                    <Icon type="search" />&nbsp;&nbsp;<span>搜索</span>
-                  </div>
+                  <Button htmlType="submit" type="ghost" style={{width:'100%',height:'40px'}}>提交</Button>
                 </Col>
-              </div>
+              </Form>
             </Row>
 
             <Row>
@@ -280,5 +278,6 @@ class Authority extends React.Component{
   }
 }
 
+Authority = Form.create()(Authority);
 export default Authority;
 

@@ -2,7 +2,7 @@ module.exports = {
   path: 'article',
   getComponent(location, cb) {
     require.ensure([], (require) => {
-      cb(null, require('./components/article-mgmt'));
+      cb(null, require('./components/Article'));
     });
   }
 };

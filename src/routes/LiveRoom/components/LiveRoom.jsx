@@ -9,8 +9,8 @@ import {
   Dropdown,
   Menu,
   Checkbox,
-  Pagination,
   Table,
+  Form,
   Input,
   Popover
 } from 'antd';
@@ -129,6 +129,8 @@ class LiveRoom extends React.Component{
   }
 
   render() {
+    const { getFieldProps } = this.props.form;
+
     return(
       <div>
         <header className="ant-video-header">
@@ -143,25 +145,23 @@ class LiveRoom extends React.Component{
                 </Link>
               </Col>
               {/*Group*/}
-              <div>
+              <Form onSubmit={this.handleSubmit} form={this.props.form}>
                 <Col span="1" offset="1">
                   <div className="right-header-right-m">
                     <Dropdown overlay={menu} trigger={['click']}>
                       <div className="ant-dropdown-link" href="#">
-                        全部 <Icon type="down" />
+                        全部 <Icon type="down"/>
                       </div>
                     </Dropdown>
                   </div>
                 </Col>
                 <Col span="3">
-                  <Input className="right-header-right-m-input" />
+                  <Input {...getFieldProps('key')} style={{height:'40px'}} />
                 </Col>
                 <Col span="2">
-                  <div className="right-header-right-r">
-                    <Icon type="search" />&nbsp;&nbsp;<span>搜索</span>
-                  </div>
+                    <Button htmlType="submit" type="ghost" style={{width:'100%',height:'40px'}}>提交</Button>
                 </Col>
-              </div>
+              </Form>
             </Row>
           </header>
         </header>
@@ -179,5 +179,6 @@ class LiveRoom extends React.Component{
   }
 }
 
+LiveRoom = Form.create()(LiveRoom);
 export default LiveRoom;
 

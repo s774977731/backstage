@@ -31,6 +31,9 @@ const menu = (
 class DataCenter extends React.Component{
   constructor() {
     super();
+    this.state = {
+      loading:false
+    }
   }
 
   handleMouseOver(e) {
@@ -45,7 +48,9 @@ class DataCenter extends React.Component{
 
   fetch(params = {}) {
     console.log(`请求参数：${params}`);
-    this.setState({ loading: true });
+    this.setState({
+
+    });
     reqwest({
       url: 'demo/homeData.json',
       method: 'get',
@@ -58,7 +63,9 @@ class DataCenter extends React.Component{
       },
       error: (err) => {
         console.log(err);
-        this.setState({ loading: false });
+        this.setState({
+
+        });
         message.error(err.statusText);
       }
     });
@@ -66,13 +73,11 @@ class DataCenter extends React.Component{
 
   renderTable() {
     return(
-      <tbody>
         <tr >
           <td>3.</td>
           <td>3会</td>
           <td>200</td>
         </tr>
-      </tbody>
     )
   }
 
