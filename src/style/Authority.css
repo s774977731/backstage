@@ -1,31 +1,37 @@
 .Icon-demo-div {
-  width: 100%;
-  height: 40px;
-  border: 1px solid grey;
-  text-align: center;
-  cursor: pointer; }
-  .Icon-demo-div .Icon-demo {
-    transform: scale(1.5);
-    -moz-transform: scale(1.5);
-    -webkit-transform: scale(1.5);
-    -ms-transform: scale(1.5);
-    -o-transform: scale(1.5); }
-
-.article-right-content-t-single {
-  position: relative;
-  margin-top: -12.5rem; }
-
-.handle-add-admin-input-border {
-  height: 40px;
-  z-index: 1; }
-  .handle-add-admin-input-border input {
-    height: 40px; }
-
-.border-radius, .Icon-demo-div {
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   -ms-border-radius: 5px;
   -o-border-radius: 5px;
-  border-radius: 5px; }
-
-/*# sourceMappingURL=Authority.css.map */
+  border-radius: 5px;
+  width: 100%;
+  height: 40px;
+  border: 1px solid grey;
+  text-align: center;
+  cursor: pointer;
+}
+.Icon-demo-div .Icon-demo {
+  transform: scale(1.5);
+  -moz-transform: scale(1.5);
+  -webkit-transform: scale(1.5);
+  -ms-transform: scale(1.5);
+  -o-transform: scale(1.5);
+}
+.article-right-content-t-single {
+  position: relative;
+  margin-top: -12.5rem;
+}
+.handle-add-admin-input-border {
+  height: 40px;
+  z-index: 1;
+}
+.handle-add-admin-input-border input {
+  height: 40px;
+}
+.border-radius {
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
+}

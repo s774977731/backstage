@@ -30,7 +30,7 @@
   ],
   "scripts": {
     "start": "npm run dev",
-    "dev": "dora -p 8001 --plugins webpack,proxy,hmr,livereload?enableJs=false",
+    "dev": "dora -p 8003 --plugins webpack,proxy?port=9001,hmr,livereload?enableJs=false",
     "lint": "eslint --ext .js,.jsx src",
     "build": "atool-build -o ./dist/${npm_package_family}/${npm_package_name}/${npm_package_version}"
   }

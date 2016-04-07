@@ -50,8 +50,6 @@ const columns = [{
   dataIndex: 'collection'
 }];
 
-
-
 class Article extends React.Component {
 
   constructor(props, context) {

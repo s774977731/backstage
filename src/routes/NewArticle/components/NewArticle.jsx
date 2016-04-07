@@ -44,6 +44,19 @@ class NewArticle extends React.Component{
     console.log(file == $('#ipt')[0])
   }
 
+  handleChange(e) {
+    switch (Number(e)) {
+      case 2:
+        this.setState({
+          
+        });
+        break;
+      default:
+
+        break;
+    }
+  }
+
   render() {
     return(
       <div>
@@ -63,9 +76,13 @@ class NewArticle extends React.Component{
             </div>
           </div>
           <div className="new-article-content-div-c">
-            <Tabs defaultActiveKey="1">
-              <TabPane tab="编辑内容" key="1">添加内容</TabPane>
-              <TabPane tab="跳转链接" key="2">跳转链接</TabPane>
+            <Tabs defaultActiveKey="1" onChange={this.handleChange}>
+              <TabPane tab="编辑内容" key="1">
+
+              </TabPane>
+              <TabPane tab="跳转链接" key="2">
+
+              </TabPane>
             </Tabs>
           </div>
           <div className="new-article-content-div-b">
@@ -88,7 +105,6 @@ class NewArticle extends React.Component{
           </div>
         </footer>
       </div>
-
     )
   }
 }
