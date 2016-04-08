@@ -35,7 +35,7 @@ const menu = (
 const columns = [{
   title: 'ID',
   dataIndex: 'name',
-  render: text => <a href="#">{text}</a>,
+  render: text => <a href="#">{text}</a>
 }, {
   title: '头像',
   dataIndex: 'age'
@@ -106,8 +106,6 @@ class Authority extends React.Component{
       this.setState({
         data : newData.concat(this.state.data)
       });
-
-
     }
   }
 

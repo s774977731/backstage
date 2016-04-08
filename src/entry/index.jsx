@@ -12,16 +12,15 @@ const rootRoute = {
     indexRoute: { onEnter: (nextState, replace) => replace('/data-center') },
     childRoutes: [
       require('../routes/Article'),
+      require('../routes/Article/newarticle'),
       require('../routes/Data'),
       require('../routes/LiveRoom'),
+      require('../routes/LiveRoom/newroom'),
+      require('../routes/LiveRoom/roomcheck'),
       require('../routes/LiveVideo'),
-      require('../routes/Authority'),
-      require('../routes/NewArticle'),
-      require('../routes/NewLiveVideo'),
-      require('../routes/NewLiveRoom'),
-      require('../routes/AddAdmin'),
-      require('../routes/VideoCheck'),
-      require('../routes/RoomCheck')
+      require('../routes/LiveVideo/newvideo'),
+      require('../routes/LiveVideo/videocheck'),
+      require('../routes/Authority')
     ]
   }]
 };
