@@ -10,9 +10,12 @@ import {
   Menu,
   Checkbox,
   Pagination,
-  Table
+  Table,
+  Form,
+  Input
 } from 'antd';
-const ButtonGroup = Button.Group;
+const FormItem = Form.Item;
+
 
 const menu = (
   <Menu>
@@ -106,6 +109,11 @@ class VideoCheck extends React.Component{
   }
 
   render() {
+    const { getFieldProps } = this.props.form;
+    const formItemLayout = {
+      wrapperCol: { span: 20 }
+    };
+
     return(
       <div>
         <header className="video-check-header" >
@@ -152,12 +160,26 @@ class VideoCheck extends React.Component{
               </div>
             </Row>
           </div>
-
           <div onScroll={this.scrollSide} className=" video-check-right col-11 col-offset-1">
-
             <Row>
               <p className="col-24">评论列表</p>
             </Row>
+            <Row>
+              <Form style={{height: '5rem'}}>
+                <FormItem
+                  {...formItemLayout}
+                  hasFeedback>
+                  <Input type="email" style={{height:'40px'}} placeholder="请输入关键词" />
+                </FormItem>
+                <FormItem
+                  wrapperCol={{ span: 4 }}
+                >
+                  <Button style={{width:'100%',height:'40px'}} htmlType="submit" type="ghost" >提交</Button>
+                </FormItem>
+              </Form>
+            </Row>
+            <br/>
+
             <div className="video-check-right-m">
               <div className="video-check-right-comment">
                 <Row>
@@ -215,21 +237,6 @@ class VideoCheck extends React.Component{
                 </div>
               </div>
             </div>
-            <div className="video-check-right-b">
-                <Row>
-                  <Col span="12">
-                    <div className="video-check-right-b-l">
-                      <p>审核通过：455 </p>
-                      <p>等待审核：45</p>
-                    </div>
-                  </Col>
-                  <Col span="12">
-                    <div className="video-check-right-b-r">
-                      <h3>审核通过，本次审核通过5条评论</h3>
-                    </div>
-                  </Col>
-                </Row>
-            </div>
           </div>
         </Row>
       </div>
@@ -237,5 +244,7 @@ class VideoCheck extends React.Component{
   }
 }
 
+
+VideoCheck = Form.create()(VideoCheck);
 export default VideoCheck;
 

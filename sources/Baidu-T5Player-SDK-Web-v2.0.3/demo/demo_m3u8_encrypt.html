@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Demo: play AES128 encrypted HLS video</title>
+</head>
+<body>
+    <div id="playercontainer"></div>
+    <script type="text/javascript" src="../player/cyberplayer.js"></script>
+    <script type="text/javascript">
+        var player = cyberplayer("playercontainer").setup({
+            width: 854,
+            height: 480,
+            stretching: "uniform",
+            file: "http://demo-video.bj.bcebos.com/AdrenalineRush_encrypt.m3u8",
+            autostart: false,
+            repeat: false,
+            volume: 100,
+            controls: true,
+            ak: 'c4c69fd2d86248029cb7e81f485b9c50' // 公有云平台注册即可获得accessKey
+        });
+        document.getElementById("playercontainer").style.left = '100px';
+        document.getElementById("playercontainer").style.top = '100px';
+    </script>
+</body>
+</html>

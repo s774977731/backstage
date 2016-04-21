@@ -105,6 +105,10 @@ class VideoCheck extends React.Component{
     }
   }
 
+  componentDidMount() {
+    console.log(window.roomCheck);
+  }
+
   render() {
     return(
       <div>
@@ -181,25 +185,9 @@ class VideoCheck extends React.Component{
                   </div>
                 </div>
               </div>
-              <div className="video-check-right-b">
-                <Row>
-                  <Col span="12">
-                    <div className="video-check-right-b-l">
-                      <p>审核通过：455 </p>
-                      <p>等待审核：45</p>
-                    </div>
-                  </Col>
-                  <Col span="12">
-                    <div className="video-check-right-b-r">
-                      <h3>审核通过，本次审核通过5条评论</h3>
-                    </div>
-                  </Col>
-                </Row>
-              </div>
           </div>
 
           <div onScroll={this.scrollSide} className=" video-check-right col-11 col-offset-1">
-
             <Row>
               <p className="col-24">评论列表</p>
             </Row>
@@ -254,22 +242,6 @@ class VideoCheck extends React.Component{
                   {commentList.comment}
                 </div>
               </div>
-
-            </div>
-            <div className="video-check-right-b">
-                <Row>
-                  <Col span="12">
-                    <div className="video-check-right-b-l">
-                      <p>审核通过：455 </p>
-                      <p>等待审核：45</p>
-                    </div>
-                  </Col>
-                  <Col span="12">
-                    <div className="video-check-right-b-r">
-                      <h3>审核通过，本次审核通过5条评论</h3>
-                    </div>
-                  </Col>
-                </Row>
             </div>
           </div>
         </Row>

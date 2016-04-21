@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router';
 import reqwest from 'reqwest';
+import md5 from "md5";
+var Base64 = require('js-base64').Base64;
 
 import {
   Row,
@@ -17,6 +19,14 @@ import {
 } from 'antd';
 const FormItem = Form.Item;
 const TabPane = Tabs.TabPane;
+//全局链接
+let publicParamsJSON = sessionStorage.publicParams;
+let publicParams = JSON.parse(publicParamsJSON);
+let publicUrl = sessionStorage.publicUrl;
+//合并对象
+let extend=function(o,n,override){
+  for(var p in n)if(n.hasOwnProperty(p) && (!o.hasOwnProperty(p) || override))o[p]=n[p];
+};
 
 class NewArticle extends React.Component{
 
@@ -24,44 +34,35 @@ class NewArticle extends React.Component{
     super();
     this.state={
       current: 'mail',
-      key:1,
       visible:false,
-      params:{}
+      params:{},
+      value:1,
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.showModal = this.showModal.bind(this);
+    this.fetch = this.fetch.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleClickUpload = this.handleClickUpload.bind(this);
   }
 
-  //handleUpload() {
-  //  let file = $('#ipt')[0];
-  //  if(!file.files || !file.files[0]){
-  //    return;
-  //  }
-  //  var reader = new FileReader();
-  //  reader.onload = function(evt){
-  //    document.getElementById('image').src = evt.target.result;
-  //    image = evt.target.result;
-  //  };
-  //  reader.readAsDataURL(file.files[0]);
-  //  console.log(file == $('#ipt')[0])
-  //}
-
-  fetch(params = {}) {
+  fetch() {
     reqwest({
-      url: '/api/comment',
+      url: publicUrl,
       method: 'get',
-      data: params,
-      type: 'json',
+      data: publicParams,
+      type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        if (result.data.data.length) {
-          this.setState({
-
-          });
-        } else {
-          this.setState({
-
-          });
+        console.log(result);
+        if (result.data.code == 0) {
+          message.success('添加文章成功');
+          setTimeout(function(){
+            window.location.href = '/#/article'
+          },500);
+        }else if (result.data.code == 1){
+          message.error('添加文章失败');
+        }else{
+          message.info('请重新登录');
         }
       },
       error: (err) => {
@@ -79,34 +80,87 @@ class NewArticle extends React.Component{
   }
 
   handleSubmit(e) {
+    const { value } = this.state;
     e.preventDefault();
     console.log('收到表单值：', this.props.form.getFieldsValue());
+    let formValue = this.props.form.getFieldsValue();
+
+    let params = {
+      type:value,
+      content:'hello',
+      title:formValue.title,
+      image_url:'111111',
+      url:formValue.link  || '',
+      recommended:Number(formValue.recommended) || 0,
+      banner:Number(formValue.banner) || 0
+    };
+    publicParams.service = 'Admin.AddArticle';
+
+    extend(publicParams,params);
+    console.log(publicParams);
+    this.fetch();
+  }
+
+  handleClickUpload() {
+      let params = {
+        uid:1
+      };
+      publicParams.service = 'Basic.UploadPicture',
+      extend(publicParams,params);
+
+      let file = $('#uploadLogo')[0];
+      if(!file.files || !file.files[0]){
+        return;
+      }
+      let reader = new FileReader();
+      reader.onload = function(evt){
+        document.getElementById('img').src = evt.target.result;
+        //base64图片
+        var index = (evt.target.result).indexOf('base64')+7;
+        publicParams.data_uri_scheme = (evt.target.result).substring(index);
+        console.log(publicParams);
+      };
+      reader.onloadend = function () {
+        $.ajax({
+          method: "POST",
+          url:publicUrl,
+          data:publicParams,
+          dataType:'jsonp'
+        }).done(function(data) {
+          console.log(data);
+        }).error(function (data) {
+          console.log(data);
+        });
+      };
+      reader.readAsDataURL(file.files[0]);
   }
 
   renderUpload() {
+    let params = {
+      service:'Basic.UploadPicture',
+      data_uri_scheme:this.state.base64,
+      uid:1
+    };
+    extend(publicParams,params);
+
     const props = {
-      name: 'upload',
-      action: '/upload.do',
+      name: 'image_url',
+      action: publicUrl,
       listType: 'picture-card',
+      data:publicParams,
       accept: 'image/*',
+      dataType:'jsonp',
       showUploadList:true,
-      defaultFileList: [{
-        uid: -1,
-        name: 'xxx.png',
-        status: 'done',
-        url: 'https://os.alipayobjects.com/rmsportal/NDbkJhpzmLxtPhB.png',
-        thumbUrl: 'https://os.alipayobjects.com/rmsportal/NDbkJhpzmLxtPhB.png'
-      }],
       onChange: (res) => {
-        console.log(res);
         switch (res.file.status) {
           case 'error':
+            console.log(res.file.thumbUrl);
             message.error('上传图片失败');
             break;
           case 'done':
             message.success('上传图片成功');
             this.setState({
-
+              base64:res.file.thumbUrl
             });
             break;
           default:
@@ -146,48 +200,59 @@ class NewArticle extends React.Component{
       ),
       onOk() {}
     });
+  }
 
+  handleChange(key) {
+    console.log(key);
+    this.setState({
+      value:key
+    })
   }
 
   render() {
-    const {visible} = this.state;
+    const { publish } = this.state;
     const { getFieldProps } = this.props.form;
     return(
       <Form onSubmit={this.handleSubmit} form={this.props.form}>
         <FormItem>
-          <Input {...getFieldProps('title')} style={{height:'40px'}} placeholder="标题"/>
+          <Input required {...getFieldProps('title')} style={{height:'40px'}} maxLength="25" placeholder="标题（最多25个字）"/>
         </FormItem>
         {this.renderUpload()  /*渲染图片上传*/}
         <FormItem>
-          <Tabs defaultActiveKey="1">
+          <img id="img" width="100" height="100" src="http://static.v1.5.webei.cn/business/images/forum_logo.png" alt="" />
+          <label htmlFor="uploadLogo" style={{marginLeft:'1rem',color:'#2db7f5',fontSize:'1.5rem',cursor:'pointer'}} id="uploadLogoAction" href="javascript:void(0)">修改</label>
+          <input style={{display:'none'}} id="uploadLogo" onChange={this.handleClickUpload} name="logo" type="file" single />
+        </FormItem>
+        <FormItem>
+          <Tabs defaultActiveKey="1" onChange={this.handleChange}>
             <TabPane tab="编辑内容" key="1" >
-              <textarea {...getFieldProps('content')} placeholder="请添加内容" className="content-div-c-textarea"/>
+              <iframe frameBorder="1" src="" height="300" width="100%"></iframe>
             </TabPane>
             <TabPane tab="跳转链接" key="2" >
-              <textarea {...getFieldProps('link')} placeholder="输入或粘贴链接" className="content-div-c-textarea" />
+              <Input type="textarea" type="url" {...getFieldProps('link')} placeholder="输入或粘贴链接"/>
             </TabPane>
           </Tabs>
         </FormItem>
         <FormItem>
           <label className="ant-checkbox-inline">
-            <Checkbox  {...getFieldProps('recommend')} />推荐到首页
+            <Checkbox  {...getFieldProps('recommended')} />推荐到首页
           </label>
           <label className="ant-checkbox-inline">
-            <Checkbox  {...getFieldProps('top')} />置顶轮播
+            <Checkbox  {...getFieldProps('banner')} />置顶轮播
           </label>
         </FormItem>
         <FormItem>
-          <Link to="/article">
-            <div className="new-article-footer-1">
-              <Button htmlType="submit" style={{width:'100%',height:'100%'}}>
-                发布
-              </Button>
-            </div>
-          </Link>
-          <div className="new-article-footer-2">
-            <Button type="ghost" htmlType="submit" style={{width:'100%',height:'100%'}}>
-              取消
+          <div className="new-article-footer-1">
+            <Button htmlType="submit" style={{width:'100%',height:'100%'}}>
+              发布
             </Button>
+          </div>
+          <div className="new-article-footer-2">
+            <Link to="/article">
+              <Button type="ghost" style={{width:'100%',height:'100%'}}>
+                取消
+              </Button>
+            </Link>
           </div>
           <div onClick={this.showModal} className="new-article-footer-3">
             预览

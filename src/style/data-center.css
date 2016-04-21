@@ -6,7 +6,7 @@
 }
 .ant-data-right .data-right-header .div {
   margin-left: 2px;
-  background-color: #34495e;
+  background-color: #555;
   color: #fff;
   cursor: pointer;
 }
@@ -15,15 +15,6 @@
 }
 .data-right-middle {
   margin-top: 3rem;
-}
-.data-right-middle .right-middle-bottom {
-  margin-top: 3rem;
-  text-align: center;
-  line-height: 1rem;
-}
-.data-right-middle h3:hover {
-  color: #e44747;
-  cursor: pointer;
 }
 .triangle {
   position: absolute;

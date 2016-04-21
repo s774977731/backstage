@@ -1,13 +1,12 @@
 .new-live-video-left {
-  height: 500px;
+  height: 700px;
   padding-left: 2%;
 }
 .new-live-video-left header input {
   height: 40px;
-  z-index: 1;
 }
 .new-live-video-left .new-live-video-left-article {
-  height: 260px;
+  height: 350px;
 }
 .new-live-video-left footer .new-video-left-footer-div1,
 .new-live-video-left footer .new-video-left-footer-div2 {
@@ -43,7 +42,7 @@
   -ms-border-radius: 5px;
   -o-border-radius: 5px;
   border-radius: 5px;
-  background-color: #5c9e1b;
+  background-color: #666;
   height: 40px;
   text-align: center;
   margin-top: 2rem;
@@ -59,7 +58,7 @@
   -o-transform: scale(1.5);
 }
 .new-live-video-right {
-  height: 500px;
+  height: 700px;
 }
 .new-live-video-right .new-live-video-right-header-div {
   -webkit-border-radius: 5px;
@@ -98,4 +97,15 @@
 .ant-time-picker-panel-input-wrap {
   width: 120px;
   height: 40px;
+}
+.addUserDiv {
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
+  background-color: #f4f4f4;
+  height: 50px;
+  line-height: 50px;
+  text-align: center;
 }

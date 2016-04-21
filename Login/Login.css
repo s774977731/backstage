@@ -1,0 +1,115 @@
+body {
+  background-color: #f9f9f9;
+  font-family: -apple-system, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", STHeiti, "Microsoft YaHei", "Microsoft JhengHei", "Source Han Sans SC", "Noto Sans CJK SC", "Source Han Sans CN", "Noto Sans SC", "Source Han Sans TC", "Noto Sans CJK TC", "WenQuanYi Micro Hei", SimSun, sans-serif;
+}
+body a {
+  text-decoration: none;
+  list-style: none;
+  cursor: pointer;
+}
+.form-group {
+  margin-top: 1rem;
+}
+#logoShow {
+  width: 8rem;
+  height: 8rem;
+}
+#logoShow + label {
+  position: relative;
+  text-decoration: none;
+  color: #42b046;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  margin-left: 2rem;
+  top: 2.5rem;
+  cursor: pointer;
+}
+.form-signin {
+  max-width: 330px;
+  padding: 15px;
+  margin: 8rem auto 0;
+}
+.form-signin .form-control {
+  position: relative;
+  height: auto;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 10px;
+  font-size: 16px;
+}
+.form-signin input[type="tel"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.signin-right {
+  text-align: center;
+  padding-top: 8rem;
+  height: 200px;
+}
+.form-control {
+  height: 40px;
+}
+.nav,
+.navbar,
+.navbar-default {
+  background-color: #fff;
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  -o-border-radius: 0px;
+  -ms-border-radius: 0px;
+  border-radius: 0px;
+}
+#fansUrl {
+  border: 1px solid grey;
+  width: 100%;
+}
+#logoShow {
+  -webkit-border-radius: 100px;
+  -moz-border-radius: 100px;
+  -o-border-radius: 100px;
+  -ms-border-radius: 100px;
+  border-radius: 100px;
+}
+h3,
+label {
+  color: #5f5f5f;
+}
+label {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+@media screen and (min-width: 768px) {
+  .login-header {
+    background-color: #fff;
+    height: 8rem;
+    min-width: 60px;
+    margin-bottom: 1rem;
+  }
+  .login-header header {
+    margin-top: 1rem;
+    text-align: center;
+    line-height: 2rem;
+    margin-bottom: 2rem;
+  }
+  .login-header header div {
+    white-space: nowrap;
+  }
+  .login-middle {
+    background-color: #fff;
+    height: 52rem;
+    min-width: 60px;
+  }
+}
+@media screen and (max-width: 768px) {
+  body {
+    background-color: #fff;
+  }
+  .login-header {
+    display: none;
+  }
+}

@@ -1,12 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router';
+import reqwest from 'reqwest';
+import md5 from 'md5';
+import remove from 'lodash/remove';
+const moment = require('moment');
+moment.locale('zh-cn');
 
 import {
   Row,
   Col,
   Button,
   Icon,
-  Dropdown,
   Menu,
   Checkbox,
   Pagination,
@@ -15,40 +19,20 @@ import {
   message,
   Input,
   Form,
-  Popover
+  Popover,
+  Select,
+  Popconfirm
 } from 'antd';
 
-const menu = (
-  <Menu>
-    <Menu.Item key="0">
-      <a href="http://www.alipay.com/">ID</a>
-    </Menu.Item>
-    <Menu.Divider />
-    <Menu.Item key="1">
-      <a href="http://www.taobao.com/">昵称</a>
-    </Menu.Item>
-    <Menu.Divider />
-    <Menu.Item key="3">账号</Menu.Item>
-  </Menu>
-);
+//全局链接
+let publicParamsJSON = sessionStorage.publicParams;
+let publicParams = JSON.parse(publicParamsJSON);
+let publicUrl = sessionStorage.publicUrl;
 
-const columns = [{
-  title: 'ID',
-  dataIndex: 'name',
-  render: text => <a href="#">{text}</a>
-}, {
-  title: '头像',
-  dataIndex: 'age'
-}, {
-  title: '登录名',
-  dataIndex: 'address'
-}, {
-  title: '添加时间',
-    dataIndex: 'addTime'
-}, {
-  title: '',
-  dataIndex: 'delete'
-}];
+
+function getStats(array = [], key) {
+  return array.length ? array.map((value) => value[key]) : [];
+}
 
 
 class Authority extends React.Component{
@@ -56,30 +40,48 @@ class Authority extends React.Component{
   constructor() {
     super();
     this.state = {
-      data : [{
-          key: '1',
-          name: '胡彦斌',
-          age: 32,
-          address: '西湖区湖底公园1号'
-        }, {
-          key: '2',
-          name: '胡彦祖',
-          age: 42,
-          address: '西湖区湖底公园1号'
-        }, {
-          key: '3',
-          name: '李大嘴',
-          age: 32,
-          address: '西湖区湖底公园1号'
-        }
-      ],
+      data : [],
       selectedRowKeys: [],
       selectedRows: [],
-      record :{}
+      record :{},
     };
     this.handleConfirm = this.handleConfirm.bind(this);
     this.handleClick = this.handleClick.bind(this);
-    this.handleClickDelete = this.handleClickDelete.bind(this);
+    this.fetch = this.fetch.bind(this);
+    this.handleClickMul = this.handleClickMul.bind(this);
+    this.getAdmins = this.getAdmins.bind(this);
+  }
+
+  columns() {
+    return(
+      [{
+        title: 'ID',
+        dataIndex: 'id',
+        render: text => <p>{text}</p>
+      }, {
+        title: '头像',
+        dataIndex: 'img'
+      }, {
+        title: '登录名',
+        dataIndex: 'username'
+      }, {
+        title: '添加时间',
+        dataIndex: 'reg_time',
+        render:(text,record) =>
+          moment.unix(text).format('YYYY-MM-DD')
+      },{
+        className:'text-right',
+        render: (text, record) =>
+          <span>
+            <Popconfirm
+              title="确定要删除这个篇评论吗？"
+              onConfirm={this.deleteClick.bind(this, record.id,record)}
+            >
+              <a href="javasript:;">删除</a>
+            </Popconfirm>
+          </span>
+      }]
+    );
   }
 
   handleConfirm() {
@@ -97,15 +99,16 @@ class Authority extends React.Component{
       document.getElementById('handle-add-admin').style.visibility = 'visible';
       document.getElementById('admin').innerHTML = '确认添加';
     }else {
-      const newData = [{
-        key: this.state.data.length+1,
-        name:  loginInput,
-        age: passwordInput,
-        address: passwordInputAgain
-      }];
-      this.setState({
-        data : newData.concat(this.state.data)
-      });
+
+      //后台请求添加管理员
+      const params = {
+        username:loginInput,
+        password:passwordInput
+      };
+      publicParams.service = 'Admin.AddAdmin';
+      publicParams.username = params.username;
+      publicParams.password = params.password;
+      this.fetch();
     }
   }
 
@@ -123,7 +126,6 @@ class Authority extends React.Component{
     }else {
       document.getElementById('handle-add-admin').style.visibility = 'hidden';
       document.getElementById('admin').innerHTML = '添加管理员';
-      console.log($('#loginInput').val(),$('#passwordInput').val(), $('#passwordInputAgain').val());
 
       this.handleConfirm();
     }
@@ -141,11 +143,11 @@ class Authority extends React.Component{
       selectedRows,
       record
     });
-    console.log(record, selected, selectedRows);
+    console.log(selectedRows);
   }
 
   onSelectChange(selectedRowKeys) {
-    console.log('selectedRowKeys changed: ', selectedRowKeys);
+    //console.log('selectedRowKeys changed: ', selectedRowKeys);
     this.setState({ selectedRowKeys });
   }
 
@@ -153,7 +155,7 @@ class Authority extends React.Component{
     this.setState({
       selectedRows
     });
-    console.log(selected, selectedRows, changeRows);
+    //console.log(selected, selectedRows, changeRows);
   }
 
   //从数组中删除指定值元素
@@ -166,25 +168,141 @@ class Authority extends React.Component{
     }
   }
 
-  handleClickDelete() {
+  handleClickMul() {
+    const {selectedRows} = this.state;
     if(this.state.selectedRows.length > 0){
-      //删除多选的表单
-      for(let i=0; i<this.state.selectedRows.length; i++) {
-        this.removeByValue(this.state.data,this.state.selectedRows[i]);
-      }
+      //请求删除多选的表单
+      publicParams.service = 'Admin.DeleteAdmins';
+      publicParams.admin_ids = getStats(selectedRows,'id');
+      console.log(getStats(selectedRows,'id'));
 
-      setTimeout(() => {
-        this.setState({
-          data:this.state.data,
-          selectedRowKeys: [],
-          selectedRows:[]
-        });
-        message.info('删除成功');
-      }, 500);
+      reqwest({
+        url: publicUrl,
+        method: 'get',
+        data: publicParams,
+        type: 'jsonp',
+        withCredentials: true,
+        success: (result) => {
+          const code = result.data.code;
+          if(code == 0) {
+            //前端界面删除多选
+            for(let i=0; i<this.state.selectedRows.length; i++) {
+              this.removeByValue(this.state.data,this.state.selectedRows[i]);
+            }
+            setTimeout(() => {
+              this.setState({
+                data:this.state.data,
+                selectedRowKeys: [],
+                selectedRows:[]
+              });
+              message.info('删除成功');
+            }, 500);
+          }else if(code == 1) {
+            message.error('删除失败');
+          }else if(code == 9) {
+            message.info('没有权限，您的token失效!');
+          }
+
+        },
+        error: (err) => {
+          console.log(err);
+          this.setState({ loading: false });
+          switch (err.status) {
+            case 404:
+              message.error('获取数据失败，请联系官方人员！');
+              break;
+            default:
+              message.error('获取数据失败，请刷新重试！');
+              break;
+          }
+        }
+      });
+
     }else{
       message.info("请至少选择一项")
     }
+  }
 
+  //前后端请求删除
+  deleteClick(admin_id,thisData) {
+    const {data} = this.state;
+    publicParams.admin_id = admin_id;
+    publicParams.service = 'Admin.DeleteAdmin';
+
+    reqwest({
+      url: publicUrl,
+      method: 'get',
+      data: publicParams,
+      type: 'jsonp',
+      withCredentials: true,
+      success: (result) => {
+        console.log(admin_id);
+        if (result.data.code == 0) {
+          console.log('success');
+          this.getAdmins();
+          this.setState({
+            data: data
+          });
+          message.success('您已删除该评论');
+        }
+      },
+      error: (err) => {
+        switch (err.status) {
+          case 404:
+            message.error('删除失败，请联系官方人员！');
+            break;
+          default:
+            message.error('删除失败，请稍后重试！');
+            break;
+        }
+      }
+    });
+  }
+
+  fetch() {
+      reqwest({
+      url: publicUrl,
+      method: 'get',
+      data: publicParams,
+      type: 'jsonp',
+      withCredentials: true,
+      success: (result) => {
+          if (result.data.admins) {
+            console.log(result.data.admins);
+            this.setState({
+              data:result.data.admins,
+            });
+        }
+        else {//添加管理员
+          console.log(result);
+          this.getAdmins();
+          this.setState({
+            data : this.state.data
+          });
+        }
+      },
+      error: (err) => {
+        console.log(err);
+        this.setState({ loading: false });
+        switch (err.status) {
+          case 404:
+            message.error('获取数据失败，请联系官方人员！');
+            break;
+          default:
+            message.error('获取数据失败，请刷新重试！');
+            break;
+        }
+      }
+    });
+  }
+
+  getAdmins() {
+    publicParams.service = 'Admin.GetAdmins';
+    this.fetch();
+  }
+
+  componentWillMount() {
+    this.getAdmins();
   }
 
   render() {
@@ -204,23 +322,20 @@ class Authority extends React.Component{
           <header className="article-right-header">
             <Row>
               <Col span="1">
-                <div className="Icon-demo-div" onClick={this.handleClickDelete}><Icon className="Icon-demo" type="delete"/></div>
+                <div className="Icon-demo-div" onClick={this.handleClickMul}><Icon className="Icon-demo" type="delete"/></div>
               </Col>
               <Col span="4" offset="1">
-                  <div className="right-header-left" onClick={this.handleClick}>
-                    &nbsp;&nbsp;&nbsp;<Icon type="plus" />&nbsp;&nbsp;<span id="admin">添加管理员</span>
-                  </div>
+                <Button onClick={this.handleClick} className="fish-btn-black" style={{width:'100%',height:'40px'}}><Icon type="plus"/><span id="admin">添加管理员</span></Button>
               </Col>
               {/*Group*/}
               <Form onSubmit={this.handleSubmit} form={this.props.form}>
-                <Col span="1" offset="12">
-                  <div className="right-header-right-m">
-                    <Dropdown overlay={menu} trigger={['click']}>
-                      <div className="ant-dropdown-link" href="#">
-                        全部 <Icon type="down"/>
-                      </div>
-                    </Dropdown>
-                  </div>
+                <Col span="2" offset="11">
+                  <Select defaultValue="all" size="large">
+                    <Option value="all">全部</Option>
+                    <Option value="ID">ID</Option>
+                    <Option value="nickName">昵称</Option>
+                    <Option value="user">账号</Option>
+                  </Select>
                 </Col>
                 <Col span="3">
                   <Input {...getFieldProps('key')} style={{height:'40px'}} />
@@ -237,7 +352,7 @@ class Authority extends React.Component{
                 <div id="handle-add-admin" style={{visibility:'hidden'}}>
                     <Row>
                       <div key="a" className="col-24 handle-add-admin-input-border">
-                        <Input required id="loginInput" style={{width:'100%'}} placeholder="登陆名"/>
+                        <Input id="loginInput" style={{width:'100%'}} placeholder="登陆名"/>
                       </div>
                     </Row>
                     <Row>
@@ -267,10 +382,10 @@ class Authority extends React.Component{
         <article className="ant-video-content ">
           {/*主体内容*/}
           <section className="article-right-content article-right-content-t-single">
-            <Table rowSelection={rowSelection} columns={columns} dataSource={this.state.data} />
+            <Table rowSelection={rowSelection} columns={this.columns()} dataSource={this.state.data} />
           </section>
         </article>
-        <footer className="ant-video-footer"></footer>
+        <footer className="ant-video-footer" />
       </div>
     )
   }

@@ -8,66 +8,38 @@ import {
   Col,
   Button,
   Icon,
-  Dropdown,
   Menu,
   Form,
   Table,
   message,
   Input,
   Popover,
-  Popconfirm
+  Popconfirm,
+  Select,
+  Pagination
 } from 'antd';
-const FormItem = Form.Item;
+const Option = Select.Option;
+//全局链接
+let publicParamsJSON = sessionStorage.publicParams;
+let publicParams = JSON.parse(publicParamsJSON);
+let publicUrl = sessionStorage.publicUrl;
 
-const menu = (
-  <Menu>
-    <Menu.Item key="0">
-      <a name="id" href="#">ID</a>
-    </Menu.Item>
-    <Menu.Divider />
-    <Menu.Item key="1">
-      <a name="nichen" href="#">昵称</a>
-    </Menu.Item>
-    <Menu.Divider />
-    <Menu.Item key="3">
-      <a name="user">账号</a>
-    </Menu.Item>
-  </Menu>
-);
+function getStats(array = [], key) {
+  return array.length ? array.map((value) => value[key]) : [];
+}
 
 class Article extends React.Component {
 
   constructor(props, context) {
     super(props, context);
     this.state = {
-      data: [
-        {
-          key: 1,
-          id: 1,
-          title: `李大嘴11111`,
-          updateTime: `2016-5-10`
-        }, {
-          key: 2,
-          id: 2,
-          title: `李大嘴22222`,
-          updateTime: `2016-5-10`
-        }, {
-          key: 3,
-          id: 3,
-          title: `李大嘴33333`,
-          updateTime: `2016-5-10`
-        }, {
-          key: 4,
-          id: 4,
-          title: `李大嘴44444`,
-          updateTime: `2016-5-10`
-        }
-      ],
+      data: [],
       selectedRowKeys: [],  // 这里配置默认勾选列
       selectedRows: [],
       record: {},
       loading: false,
-      operate: false
+      operate: false,
+      total:1
     };
     this.handleClick = this.handleClick.bind(this);
     this.onSelectChange = this.onSelectChange.bind(this);
@@ -76,17 +48,21 @@ class Article extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.fetch = this.fetch.bind(this);
     this.columns = this.columns.bind(this);
+    this.getArticles = this.getArticles.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.getArticleNum = this.getArticleNum.bind(this);
   }
 
   columns() {
     return([{
         title: 'ID',
         width:'10%',
-        dataIndex: 'id'
+        dataIndex: 'article_id'
       }, {
         title: '头图',
         width:'10%',
-        dataIndex: 'img'
+        dataIndex: 'image_url',
+        render:(text) => <div><img src={text} style={{width:50}} /></div>
       }, {
         title: '标题',
         width:'15%',
@@ -108,18 +84,20 @@ class Article extends React.Component {
         className:'text-right',
         render: (text, record) =>
             <span>
-              <a href="#">
-                <Icon type="link"/>
-                <span className="ant-divider" />
-                <Icon type="message"/>11145
-              </a>
+              <Link to="/detail-article">
+              <Icon type="link"/>
               <span className="ant-divider" />
+                 <Icon type="message"/>11145
+              </Link>
+            <span className="ant-divider" />
               <Popconfirm
                 title="确定要删除这个篇评论吗？"
-                onConfirm={this.deleteClick.bind(this, record.comment_id, record.thread_id)}
+                onConfirm={this.deleteClick.bind(this, record.article_id)}
               >
                 <a href="javasript:;">删除</a>
               </Popconfirm>
+              <span className="ant-divider" />
+              <a>推荐</a>
             </span>
         }])
   }
@@ -143,15 +121,16 @@ class Article extends React.Component {
   }
 
   handleClick() {
-    const operateDelete = document.getElementsByClassName("right-header-left")[0];
+    const operateDelete = document.getElementsByClassName("fish-btn-black")[0];
+
     if (this.state.operate == false) {
-      operateDelete.innerHTML = '<span>&nbsp;&nbsp;&nbsp;</span><i class=" anticon anticon-cross"></i><span>&nbsp;&nbsp;</span><span>取消</span>';
+      operateDelete.innerHTML = '<i class=" anticon anticon-cross"></i><span>&nbsp;&nbsp;</span><span>取消</span>';
       this.setState({
         operate: !this.state.operate,
         selectedRowKeys: []
       });
     } else {
-      operateDelete.innerHTML = '<span>&nbsp;&nbsp;&nbsp;</span><i class=" anticon anticon-setting"></i><span>&nbsp;&nbsp;</span><span>操作</span>';
+      operateDelete.innerHTML = '<i class=" anticon anticon-setting"></i><span>操作</span>';
       this.setState({
         operate: !this.state.operate
       });
@@ -168,24 +147,57 @@ class Article extends React.Component {
     }
   }
 
-  //前段界面删除
+  //删除多选
   handleClickDelete() {
     const {data, selectedRows} = this.state;
     if (selectedRows.length > 0) {
-      setTimeout(() => {
-        this.setState({
-          data: this.state.data,
-          selectedRowKeys: [],
-          loading: false,
-          rowSelection: null
-        });
-        message.info('删除成功');
-      }, 500);
+      //请求删除多选的表单
+      publicParams.service = 'Admin.DeleteArticles';
+      publicParams.article_ids = getStats(selectedRows,'article_id');
+      console.log(getStats(selectedRows,'article_id'));
+      reqwest({
+        url: publicUrl,
+        method: 'get',
+        data: publicParams,
+        type: 'jsonp',
+        withCredentials: true,
+        success: (result) => {
+          const code = result.data.code;
+          if(code == 0) {
+            //前端界面删除多选
+            for(let i=0; i<this.state.selectedRows.length; i++) {
+              this.removeByValue(this.state.data,this.state.selectedRows[i]);
+            }
+            setTimeout(() => {
+              this.setState({
+                data:this.state.data,
+                selectedRowKeys: [],
+                selectedRows:[]
+              });
+              message.info('删除成功');
+            }, 500);
 
-      //删除多选的表单
-      for (let i = 0; i < selectedRows.length; i++) {
-        this.removeByValue(data, selectedRows[i]);
-      }
+          }else if(code == 1) {
+
+            message.error('删除失败');
+          }else if(code == 9) {
+
+            message.info('没有权限，您的token失效!');
+          }
+        },
+        error: (err) => {
+          console.log(err);
+          this.setState({ loading: false });
+          switch (err.status) {
+            case 404:
+              message.error('获取数据失败，请联系官方人员！');
+              break;
+            default:
+              message.error('获取数据失败，请刷新重试！');
+              break;
+          }
+        }
+      });
 
     } else {
       message.info("请至少选择一项")
@@ -193,24 +205,24 @@ class Article extends React.Component {
   }
 
   //前后端请求删除
-  deleteClick(commentId, threadId) {
-    const { comments } = this.state;
-    console.log(commentId, threadId);
+  deleteClick(article_id) {
+    const {data} = this.state;
+    publicParams.article_id = article_id;
+    publicParams.service = 'Admin.DeleteArticle';
+
     reqwest({
-      url: `/api/comment/${commentId}`,
-      method: 'DELETE',
-      type: 'json',
-      data: {threadId},
+      url: publicUrl,
+      method: 'get',
+      data: publicParams,
+      type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        this.setState({
-          loading: false
-        });
-        if (result.code == 1) {
-          const cComment = comments;
-          remove(cComment, (comment) => comment.comment_id === commentId);//lodash中的根据方法删除指定数组中的某个满足条件的值
+        console.log(article_id);
+        if (result.data.code == 0) {
+          console.log('success');
+          this.getArticles();
           this.setState({
-            posts: cComment
+            data: data
           });
           message.success('您已删除该评论');
         }
@@ -238,25 +250,28 @@ class Article extends React.Component {
       console.log(values);
       this.fetch(values);
     });
-
   }
 
-  fetch(params = {}) {
+  fetch() {
     reqwest({
-      url: '/api/comment',
+      url: publicUrl,
       method: 'get',
-      data: params,
-      type: 'json',
+      data: publicParams,
+      type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        if (result.data) {
+        if (result.data.articles) {
+          console.log(result.data.articles);
           this.setState({
-
+            data:result.data.articles
           });
-        } else {
+          //存值到sessionStorage
+        }
+        if (result.data.num) {
           this.setState({
-
+            total:result.data.num
           });
+          console.log(result.data.num);
         }
       },
       error: (err) => {
@@ -285,7 +300,28 @@ class Article extends React.Component {
       selectedRows,
       record
     });
-    console.log(record, selected, selectedRows);
+    console.log(selectedRows);
+  }
+
+  handleChange(current) {
+    console.log(current);
+    publicParams.page = current;
+    this.getArticles()
+  }
+
+  getArticles() {
+    publicParams.service = 'Admin.GetArticles';
+    this.fetch();
+  }
+
+  getArticleNum() {
+    publicParams.service = 'Admin.GetArticleNum';
+    this.fetch();
+  }
+
+  componentWillMount() {
+    this.getArticles();
+    this.getArticleNum()
   }
 
   render() {
@@ -303,32 +339,27 @@ class Article extends React.Component {
         <header className="article-right-header">
           <Row>
             <Col span="2">
-              <div className="right-header-left" onClick={this.handleClick}>
-                &nbsp;&nbsp;&nbsp;<Icon type="setting"/>&nbsp;&nbsp;<span>操作</span>
-              </div>
+              <Button className="fish-btn-black" style={{width:'100%',height:'40px'}} onClick={this.handleClick}><Icon type="setting"/>操作</Button>
             </Col>
             <Col span="5" style={{whiteSpace:'nowarp',textAlign:'center'}}>
               <span style={{ marginLeft: 8 }}>
                 {hasSelected ? `选择了 ${selectedRowKeys.length} 个对象` : ''}
               </span>
             </Col>
-            <Col span="2" offset="8">
+            <Col span="2" offset="7">
               <Link to="/new-article">
-                <div className="right-header-right-l">
-                  <Icon type="plus"/>&nbsp;&nbsp;<span>添加文章</span>
-                </div>
+                <Button  className="fish-btn-black" style={{width:'100%',height:'40px'}}><Icon style={{marginLeft:'-5px'}} type="plus"/>添加文章</Button>
               </Link>
             </Col>
             {/*Group*/}
             <Form onSubmit={this.handleSubmit} form={this.props.form}>
-              <Col span="1" offset="1">
-                <div className="right-header-right-m">
-                  <Dropdown overlay={menu} trigger={['click']}>
-                    <div className="ant-dropdown-link" href="#">
-                      全部 <Icon type="down"/>
-                    </div>
-                  </Dropdown>
-                </div>
+              <Col span="2" offset="1">
+                  <Select defaultValue="all" size="large">
+                    <Option value="all">全部</Option>
+                    <Option value="ID">ID</Option>
+                    <Option value="nickName">昵称</Option>
+                    <Option value="user">账号</Option>
+                  </Select>
               </Col>
               <Col span="3">
                 <Input {...getFieldProps('key')} style={{height:'40px'}} />
@@ -358,15 +389,15 @@ class Article extends React.Component {
             </Col>
           </Row>
         </header>
-
         <section className="article-right-content article-right-content-single-table">
           <Table
             rowSelection={rowSelection}
-            pagination={{ pageSize: 7 }}
+            pagination = {false}
             columns={this.columns()}
             dataSource={this.state.data} />
+          <br/>
+          <Pagination onChange={this.handleChange} defaultCurrent={1} total={this.state.total} />,
         </section>
-
         <footer className="article-right-footer"/>
       </div>
     );

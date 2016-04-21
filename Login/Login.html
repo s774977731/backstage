@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="font-size: 62.5%">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Welcome</title>
+    <!-- Bootstrap -->
+    <link href="sources/bootstrap.min.css" rel="stylesheet">
+    <link href="Login.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div>
+    <nav class="navbar navbar-default ">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <a class="navbar-brand" style="width: 8rem" href="#"><img class="img-responsive" src="http://static.webei.cn/business/images/themeLogo.png"/></a>
+                <a class="navbar-brand" href="#">微贝粉丝互动解决方案</a>
+            </div>
+        </div><!-- /.container-fluid -->
+    </nav>
+    <div class="container col-sm-8 col-sm-offset-2 login-middle">
+        <form action="http://www.webei.cn/business/member/newfans" method="post" enctype="multipart/form-data" id="signupForm"
+              class="signup-form">
+            <input type="hidden" name="_token" id="signupToken" value="F1XmmMo7ha982krfTO9YgIiVYOpMtrd3NClFXAc3"/>
+        </form>
+
+        <!--登录-->
+        <fieldset id="login">
+            <div class="container col-sm-10 col-sm-offset-1">
+                <h3 style="text-align: center">登录</h3>
+                <hr />
+                <div class="col-sm-6">
+                    <form action="" id="LoginForm" class="form-signin" style="margin-bottom: -2rem">
+                        <label for="inputPhone" class="sr-only">请输入手机号</label>
+                        <input type="tel" name="username" id="inputPhone" class="form-control" placeholder="请输入手机号" maxlength="11">
+                        <label for="inputPassword" class="sr-only">请输入密码</label>
+                        <input type="password" name="password" id="inputPassword" class="form-control" placeholder="请输入密码">
+                        <div style="margin-bottom: 2.5rem;text-align: right">
+                            <span id="checkPhone" style=";color: #F04042" ></span>
+                            <a id="forgetPassword" style="text-decoration: none" href="#">忘记密码？</a>
+                        </div>
+                        <button id="loginBtn" class="btn btn-lg btn-primary btn-block" type="submit">登录</button>
+                    </form>
+                </div>
+                <div class="col-sm-6 signin-right">
+                    <div class="row">
+                        <img src="http://static.webei.cn/business/images/weixin.jpg" class="col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3" alt="Responsive image">
+                    </div>
+                    <div class="row">
+                        <p style="margin-top: 1rem">关注微贝粉丝圈公众号</p>
+                        <p>了解最新产品动态/咨询</p>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <!--忘记密码-->
+        <fieldset id="forgetPass" style="display: none">
+            <h3 style="text-align: center">忘记密码</h3>
+            <hr />
+            <form class="col-sm-6 col-sm-offset-3">
+                <div class="form-group col-sm-12">
+                    <label for="phoneNum">手机号:</label>
+                    <input type="tel" class="form-control" id="phoneNum" name="phone" required
+                           placeholder="请输入手机号"
+                           maxlength="11" minlength="11">
+                    <p class="help-block" id="checkNumHelp" style="color: #F04042"></p>
+                </div>
+                <div>
+                    <label class="col-sm-12" for="captchaInput">验证码:</label>
+                    <div class="col-sm-6" style="margin-bottom: 2rem">
+                        <input id="captchaInput" class="form-control"/>
+                    </div>
+                    <div class="col-sm-6">
+                        <button class="btn btn-primary btn-block" id="Btn_SMS_Reg" style="overflow: hidden;height: 40px">获取验证码</button>
+                    </div>
+                    <p class="col-sm-6" id="checkCode" style="color: #F04042;margin-top: 1rem"></p>
+                </div>
+                <div class="form-group col-sm-12" style="margin-top: 10rem">
+                    <button id="confirm" type="submit" class="btn btn-lg btn-primary btn-block next">确定</button>
+                </div>
+            </form>
+        </fieldset>
+        <fieldset id="resetPass" style="display: none">
+            <h3 style="text-align: center">重置密码</h3>
+            <hr />
+            <form class="col-sm-6 col-sm-offset-3">
+                <div class="form-group col-sm-12">
+                    <label for="phonePass">新密码:</label>
+                    <input type="password" class="form-control" id="phonePass" name="phone" required
+                           placeholder="请输入6-20个字符的密码"
+                           maxlength="20">
+                    <br />
+                    <label for="rePhonePass">确认密码:</label>
+                    <input type="password" class="form-control" id="rePhonePass" name="phone" required
+                           placeholder="在输入一次，不要忘记喽"
+                           maxlength="20">
+                    <p id="checkLength" style="color: #F04042;margin-top: 1rem"></p>
+                    <br />
+                </div>
+                <div class="form-group col-sm-12" style="margin-top: 10rem">
+                    <button id="reset" type="button" class="btn btn-lg btn-primary btn-block next">重置密码</button>
+                </div>
+            </form>
+        </fieldset>
+        <div class="modal fade bs-example-modal-sm" id="getModal">
+            <div class="modal-dialog  modal-sm">
+                <div class="modal-content">
+                    <br />
+                    <div class="modal-header">
+                        <h4 class="modal-title">密码修改成功</h4>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="PassConfirm" data-dismiss="modal">确定</button>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+    </div>
+</div>
+
+<script src="sources/jquery-2.1.4.min.js"></script>
+<script src="sources/jquery.md5.js"></script>
+<script src="sources/bootstrap.min.js"></script>
+<script src="Login.js"></script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
+import md5 from 'md5';
 import {
   DatePicker,
   Button,
@@ -11,12 +12,9 @@ import {
   Row,
   Col
 } from 'antd';
-
 const SubMenu = Menu.SubMenu;
 
 class App extends Component {
-
-
   constructor() {
     super();
     this.state = {

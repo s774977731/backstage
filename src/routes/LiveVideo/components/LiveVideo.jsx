@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router';
+import reqwest from 'reqwest';
 //import NewLiveVideo from '../../NewLiveVideo/components/NewLiveVideo.jsx';
 
 import {
@@ -7,31 +8,16 @@ import {
   Col,
   Button,
   Icon,
-  Dropdown,
   Menu,
   Checkbox,
   Table,
   Tag,
   Form,
   Input,
-  Popover
+  Popover,
+  Select,
+  message
 } from 'antd';
-
-
-const menu = (
-  <Menu>
-    <Menu.Item key="0">
-      <a href="#">ID</a>
-    </Menu.Item>
-    <Menu.Divider />
-    <Menu.Item key="1">
-      <a href="#">昵称</a>
-    </Menu.Item>
-    <Menu.Divider />
-    <Menu.Item key="3">账号</Menu.Item>
-  </Menu>
-);
-
 
 let buildDate = new Date();
 let nowBuildTime = buildDate.getFullYear()+'/'+buildDate.getMonth()+'/'+buildDate.getDay()+'  '+buildDate.getHours()+
@@ -76,6 +62,7 @@ class LiveVideo extends React.Component{
     };
     this.handClickState = this.handClickState.bind(this);
     this.handClickAuthority = this.handClickAuthority.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   handClickState() {
@@ -89,8 +76,49 @@ class LiveVideo extends React.Component{
     })
   }
 
-  handleSearch() {
-    console.log(NewLiveVideo.handleClickCheck);
+  handleSubmit(e) {
+    e.preventDefault();
+    this.props.form.validateFields((errors, values) => {
+      if (!!errors) {
+        console.log('Errors in form!!!');
+        return;
+      }
+      console.log(values);
+      this.fetch(values);
+    });
+  }
+
+  fetch(params = {}) {
+    reqwest({
+      url: '/api/comment',
+      method: 'get',
+      data: params,
+      type: 'json',
+      withCredentials: true,
+      success: (result) => {
+        if (result.data) {
+          this.setState({
+
+          });
+        } else {
+          this.setState({
+
+          });
+        }
+      },
+      error: (err) => {
+        console.log(err);
+        this.setState({ loading: false });
+        switch (err.status) {
+          case 404:
+            message.error('获取数据失败，请联系官方人员！');
+            break;
+          default:
+            message.error('获取数据失败，请刷新重试！');
+            break;
+        }
+      }
+    });
   }
 
   columns() {
@@ -150,23 +178,20 @@ class LiveVideo extends React.Component{
           {/*与Article同步CSS代码*/}
           <header className="article-right-header">
             <Row>
-              <Col span="2" offset="15">
+              <Col span="2" offset="14">
                 <Link to="/new-live-video">
-                  <div className="right-header-right-l">
-                    <Icon type="plus" />&nbsp;&nbsp;<span>新建直播</span>
-                  </div>
+                  <Button htmlType="submit" className="fish-btn-black" style={{width:'100%',height:'40px'}}><Icon style={{marginLeft:'-5px'}} type="plus"/>新建直播</Button>
                 </Link>
               </Col>
               {/*Group*/}
               <Form onSubmit={this.handleSubmit} form={this.props.form}>
-                <Col span="1" offset="1">
-                  <div className="right-header-right-m">
-                    <Dropdown overlay={menu} trigger={['click']}>
-                      <div className="ant-dropdown-link" href="#">
-                        全部 <Icon type="down"/>
-                      </div>
-                    </Dropdown>
-                  </div>
+                <Col span="2" offset="1">
+                  <Select defaultValue="all" size="large">
+                    <Option value="all">全部</Option>
+                    <Option value="ID">ID</Option>
+                    <Option value="nickName">昵称</Option>
+                    <Option value="user">账号</Option>
+                  </Select>
                 </Col>
                 <Col span="3">
                   <Input {...getFieldProps('key')} style={{height:'40px'}} />
