@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router';
 import reqwest from 'reqwest';
 import md5 from "md5";
+import ReactQuill from 'react-quill';
+import QuillStyle from 'react-quill/node_modules/quill/dist/quill.snow.css'
 var Base64 = require('js-base64').Base64;
 
 import {
@@ -37,12 +39,14 @@ class NewArticle extends React.Component{
       visible:false,
       params:{},
       value:1,
+      text:''
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.showModal = this.showModal.bind(this);
     this.fetch = this.fetch.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleClickUpload = this.handleClickUpload.bind(this);
+    this.onTextChange = this.onTextChange.bind(this);
   }
 
   fetch() {
@@ -80,14 +84,14 @@ class NewArticle extends React.Component{
   }
 
   handleSubmit(e) {
-    const { value } = this.state;
+    const { value, text } = this.state;
     e.preventDefault();
     console.log('收到表单值：', this.props.form.getFieldsValue());
     let formValue = this.props.form.getFieldsValue();
 
     let params = {
       type:value,
-      content:'hello',
+      content:text,
       title:formValue.title,
       image_url:'111111',
       url:formValue.link  || '',
@@ -209,6 +213,12 @@ class NewArticle extends React.Component{
     })
   }
 
+  onTextChange(value) {
+    this.setState({
+      text:value
+    });
+  }
+
   render() {
     const { publish } = this.state;
     const { getFieldProps } = this.props.form;
@@ -223,19 +233,22 @@ class NewArticle extends React.Component{
           <label htmlFor="uploadLogo" style={{marginLeft:'1rem',color:'#2db7f5',fontSize:'1.5rem',cursor:'pointer'}} id="uploadLogoAction" href="javascript:void(0)">修改</label>
           <input style={{display:'none'}} id="uploadLogo" onChange={this.handleClickUpload} name="logo" type="file" single />
         </FormItem>
-        <FormItem>
+        <FormItem style={{height:'280px'}}>
           <Tabs defaultActiveKey="1" onChange={this.handleChange}>
             <TabPane tab="编辑内容" key="1" >
-              <iframe frameBorder="1" src="" height="300" width="100%"></iframe>
+              <ReactQuill theme="snow"
+                          style={{height:'250px'}}
+                          value={this.state.text}
+                          onChange={this.onTextChange} />
             </TabPane>
             <TabPane tab="跳转链接" key="2" >
               <Input type="textarea" type="url" {...getFieldProps('link')} placeholder="输入或粘贴链接"/>
             </TabPane>
           </Tabs>
         </FormItem>
-        <FormItem>
+        <FormItem >
           <label className="ant-checkbox-inline">
-            <Checkbox  {...getFieldProps('recommended')} />推荐到首页
+            <Checkbox  {...getFieldProps('recommended')} />推荐
           </label>
           <label className="ant-checkbox-inline">
             <Checkbox  {...getFieldProps('banner')} />置顶轮播

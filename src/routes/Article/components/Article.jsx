@@ -16,7 +16,8 @@ import {
   Popover,
   Popconfirm,
   Select,
-  Pagination
+  Pagination,
+  Spin
 } from 'antd';
 const Option = Select.Option;
 //全局链接
@@ -37,7 +38,7 @@ class Article extends React.Component {
       selectedRowKeys: [],  // 这里配置默认勾选列
       selectedRows: [],
       record: {},
-      loading: false,
+      spin: true,
       operate: false,
       total:1
     };
@@ -84,14 +85,14 @@ class Article extends React.Component {
         className:'text-right',
         render: (text, record) =>
             <span>
-              <Link to="/detail-article">
-              <Icon type="link"/>
+              <a onClick={this.enterDetailArticle.bind(this,record.article_id,record)}>
+                <Icon type="link"/>
+                <span className="ant-divider" />
+                <Icon type="message"/>11145
+              </a>
               <span className="ant-divider" />
-                 <Icon type="message"/>11145
-              </Link>
-            <span className="ant-divider" />
               <Popconfirm
-                title="确定要删除这个篇评论吗？"
+                title="确定要删除这个篇文章吗？"
                 onConfirm={this.deleteClick.bind(this, record.article_id)}
               >
                 <a href="javasript:;">删除</a>
@@ -204,6 +205,21 @@ class Article extends React.Component {
     }
   }
 
+  //进入文章细节
+  enterDetailArticle(article_id,record) {
+    //获取文章内容
+    publicParams.service = 'Admin.GetArticle';
+    publicParams.article_id = article_id;
+    this.fetch();
+    //获取评论列表
+    publicParams.service = 'Admin.GetComments';
+    publicParams.type = 1;
+    publicParams.id = article_id;
+    this.fetch();
+    window.record = record;
+    console.log(record);
+  }
+
   //前后端请求删除
   deleteClick(article_id) {
     const {data} = this.state;
@@ -217,7 +233,6 @@ class Article extends React.Component {
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        console.log(article_id);
         if (result.data.code == 0) {
           console.log('success');
           this.getArticles();
@@ -261,17 +276,26 @@ class Article extends React.Component {
       withCredentials: true,
       success: (result) => {
         if (result.data.articles) {
-          console.log(result.data.articles);
           this.setState({
+            spin:false,
             data:result.data.articles
           });
-          //存值到sessionStorage
         }
         if (result.data.num) {
           this.setState({
+            spin:false,
             total:result.data.num
           });
-          console.log(result.data.num);
+        }
+        //获取文章内容
+        if(result.data.article) {
+          window.article = result.data.article;
+          window.location.href = '/#/detail-article';
+        }
+        //获取评论列表
+        if(result.data.comments) {
+          window.comments = result.data.comments;
+          window.location.href = '/#/detail-article';
         }
       },
       error: (err) => {
@@ -325,7 +349,7 @@ class Article extends React.Component {
   }
 
   render() {
-    const { selectedRowKeys,operate } = this.state;
+    const { selectedRowKeys, operate, spin } = this.state;
     const { getFieldProps } = this.props.form;
     const rowSelection = (!this.state.operate) ? null : {
       selectedRowKeys,
@@ -334,7 +358,7 @@ class Article extends React.Component {
     };
     const hasSelected = selectedRowKeys.length > 0;
     return (
-      <div className="ant-article-right">
+      <Spin spining={spin} className="ant-article-right">
         {/*头部*/}
         <header className="article-right-header">
           <Row>
@@ -392,14 +416,16 @@ class Article extends React.Component {
         <section className="article-right-content article-right-content-single-table">
           <Table
             rowSelection={rowSelection}
-            pagination = {false}
+            pagination = {{
+                   defaultCurrent:1,
+                   onChange:this.handleChange,
+                   total:this.state.total}}
             columns={this.columns()}
             dataSource={this.state.data} />
           <br/>
-          <Pagination onChange={this.handleChange} defaultCurrent={1} total={this.state.total} />,
         </section>
         <footer className="article-right-footer"/>
-      </div>
+      </Spin>
     );
   }
 }

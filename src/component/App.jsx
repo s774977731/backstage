@@ -25,10 +25,12 @@ class App extends Component {
   }
 
   handleClick(e) {
-    console.log(e);
     this.setState({
       current: e.key
     });
+    //全局的key
+    window.key = e.key;
+    console.log(window.key);
 
     switch (Number(e.key)) {
       case 2:

@@ -156,18 +156,20 @@ class LiveVideo extends React.Component{
       </div>
   },{
       key: 'operation',
-      render() {
+      render:function(text,record) {
         return (
           <span>
-            <Link to="/video-check">
-              <Button type="ghost"><Icon type="play-circle-o" />查看/审核直播</Button>
-            </Link>
+            <Button onClick={this.getVideoContent.bind(this,record)} type="ghost"><Icon type="play-circle-o" />查看/审核直播</Button>
             <Button type="ghost"><Icon type="setting"/></Button>
             <Button type="ghost">推荐</Button>
           </span>
         );
-      }
+      }.bind(this)
     }]
+  }
+
+  getVideoContent(record) {
+    console.log(record);
   }
 
   render() {

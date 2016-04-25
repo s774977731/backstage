@@ -57,7 +57,7 @@ class NewLiveRoom extends React.Component{
     this.fetch = this.fetch.bind(this);
     this.getTableRight = this.getTableRight.bind(this);
     this.handlePicUpload = this.handlePicUpload.bind(this);
-    this.handleCreateRoom = this.handleCreateRoom.bind(this);
+    this.handleCreateUpdateRoom = this.handleCreateUpdateRoom.bind(this);
   }
 
   columnsLeft() {
@@ -71,11 +71,14 @@ class NewLiveRoom extends React.Component{
         dataIndex: 'nick_name'
       },  {
         title: '用户名',
-        dataIndex: 'user_name'
+        dataIndex: 'user_name',
+        getCheckboxProps(record){
+
+        }
       },{
         className:'text-right',
         render:(text,record) => <div>
-            <Select defaultValue={window.room ? 'compere' : ''} onChange={this.handletitlesChange.bind(this,record)} style={{ width: 90,textAlign:'center' }} >
+            <Select defaultValue={window.room ? record.title : ''} onChange={this.handletitlesChange.bind(this,record)} style={{ width: 90,textAlign:'center' }} >
             <Option value="compere">主持人</Option>
             <Option value="guest">嘉宾</Option>
             <Option value="commentator">评论员</Option>
@@ -96,7 +99,7 @@ class NewLiveRoom extends React.Component{
         dataIndex: 'nick_name'
       },  {
         title: '用户名',
-        dataIndex: 'user_name'
+        dataIndex: 'user_name',
       },{
         title: '添加时间',
         dataIndex: 'reg_time'
@@ -155,10 +158,10 @@ class NewLiveRoom extends React.Component{
     console.log(recode);
   }
 
-  handleCreateRoom() {
+  handleCreateUpdateRoom() {
     const { selectedRows } = this.state;
     let roomName = ReactDOM.findDOMNode(this.refs.roomName).childNodes[0].value;
-    if(roomName.length == 0){
+    if(roomName.length == 0) {
       message.error('请输入频道名称');
       ReactDOM.findDOMNode(this.refs.roomName).childNodes[0].focus();
       return false;
@@ -171,9 +174,15 @@ class NewLiveRoom extends React.Component{
       uids:uids,
       titles:titles
     };
-    publicParams.service = 'Admin.CreateRoom';
     extend(publicParams,params);
-    console.log(publicParams);
+    if(!window.room.id) {
+      publicParams.service = 'Admin.CreateRoom';
+      console.log(window.room,11111);
+    }else {
+      publicParams.service = 'Admin.UpdateRoom';
+      publicParams.room_id = 16;
+      console.log(window.room,22222);
+    }
     reqwest({
       url: publicUrl,
       method: 'get',
@@ -181,19 +190,36 @@ class NewLiveRoom extends React.Component{
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        console.log(result.data);
-        if(result.data.code == 0) {
-          message.success('房间创建成功');
-          setTimeout(function () {
-            window.location.href = '/#/live-room'
-          },1000)
-        }else if(result.data.code == 1) {
-          message.error('房间创建失败')
-        }else if(result.data.code == 2) {
-          message.info('房间创建成功，但添加主持人失败')
+        console.log(result);
+        if(!window.room.id) {
+
+          if(result.data.code == 0) {
+            message.success('房间创建成功');
+            setTimeout(function () {
+              window.location.href = '/#/live-room'
+            },1000)
+          }else if(result.data.code == 1) {
+            message.error('房间创建失败')
+          }else if(result.data.code == 2) {
+            message.info('房间创建成功，但添加主持人失败')
+          }else {
+            message.error('非法请求')
+          }
         }else {
-          message.error('请重新登录')
+          if(result.data.code == 0) {
+            message.success('房间更新成功');
+            setTimeout(function () {
+              window.location.href = '/#/live-room'
+            },1000)
+          }else if(result.data.code == 1) {
+            message.error('房间更新失败')
+          }else if(result.data.code == 2) {
+            message.info('房间更新成功，但添加主持人失败')
+          }else {
+            message.error('非法请求')
+          }
         }
+
       },
       error: (err) => {
         console.log(err);
@@ -417,25 +443,35 @@ class NewLiveRoom extends React.Component{
 
   onSelect(record, selected, selectedRows) {
 
-    if(selectedRows.length >4) {
-      message.info('最多选择4条');
-      return false;
-    }else {
       this.setState({
         selectedRows,
         record,
         selection:true
       });
-    }
+      console.log(selectedRows);
+  }
+
+  onSelectAll(selected, selectedRows, changeRows) {
+    this.setState({
+      selectedRows,
+    });
     console.log(selectedRows);
   }
 
   onSelectChange(selectedRowKeys) {
-    if(selectedRowKeys.length<5){
       console.log('selectedRowKeys changed: ', selectedRowKeys);
       this.setState({ selectedRowKeys });
+      sessionStorage.selectedRowKeys = JSON.stringify(selectedRowKeys);
+
+  }
+
+  getCheckboxProps(record) {
+    return {
+      defaultChecked: record.nick_name == 'hello', // 配置默认勾选的列
+      //disabled: record.nick_name == 'hello'    // 配置无法勾选的列
     }
   }
+
   /**
    * 界面初始化
    */
@@ -450,22 +486,25 @@ class NewLiveRoom extends React.Component{
     this.getTableRight();
   }
   componentDidMount() {
-    console.log(window.room);
+    console.log(window.roomId,window.room.hosts)
   }
 
   render() {
-    const { loading, selectedRowKeys } = this.state;
+    const { selectedRowKeys } = this.state;
+    let keys;
+
     const rowSelection = {
-      selectedRowKeys,
+      getCheckboxProps:this.getCheckboxProps.bind(this),
       onChange: this.onSelectChange.bind(this),
       onSelect: this.onSelect.bind(this),
+      onSelectAll:this.onSelectAll.bind(this)
     };
     const hasSelected = selectedRowKeys.length > 0;
     return(
       <div>
         <div className="new-live-video-left col-12">
           <header className="col-23">
-            <Input value={this.renderRoomName()} placeholder="输入或更改频道名称" />
+            <Input ref="roomName" defaultValue={this.renderRoomName()} placeholder="输入或更改频道名称" />
             <div style={{margin:'10px 0 0 0'}}>
               <img id="img" width="100" height="100" src="http://static.v1.5.webei.cn/business/images/forum_logo.png" alt="" />
               <label htmlFor="uploadLogo" style={{marginLeft:'1rem',color:'#2db7f5',fontSize:'1.5rem',cursor:'pointer'}} id="uploadLogoAction" href="javascript:void(0)">修改</label>
@@ -475,7 +514,7 @@ class NewLiveRoom extends React.Component{
           <article className="col-23 new-live-video-left-article">
             <div style={{fontSize:'1.5rem',marginBottom:'5px'}}>该频道的直播人</div>
             <Table
-              pagination={false}
+              pagination={{pageSize:'4'}}
               columns={this.columnsLeft()}
               dataSource={this.state.selectedRows} />
           </article>
@@ -485,7 +524,7 @@ class NewLiveRoom extends React.Component{
               <div className="col-5 new-video-left-footer-div1">开放评论</div>
               <div className="col-5 new-video-left-footer-div2">审核评论</div>
             </Row>
-            <div onClick={this.handleCreateRoom} className="col-24 new-video-left-footer-div-b"><Icon type="check"/></div>
+            <div onClick={this.handleCreateUpdateRoom} className="col-24 new-video-left-footer-div-b"><Icon type="check"/></div>
           </footer>
         </div>
         <div className="new-live-video-right col-12">
@@ -503,7 +542,6 @@ class NewLiveRoom extends React.Component{
             </div>
           </section>
         </div>
-
       </div>
     )
   }

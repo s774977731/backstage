@@ -1,5 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router';
+import reqwest from 'reqwest';
+import PublicComments from '../../Public/PublicComments.jsx';
+import publicCommentsStyle from '../../Public/publicComments.css';
 
 import {
   Row,
@@ -10,103 +13,90 @@ import {
   Menu,
   Checkbox,
   Pagination,
-  Table
+  Table,
+  Form,
+  Input,
+  message
 } from 'antd';
-const ButtonGroup = Button.Group;
+//全局链接
+let publicParamsJSON = sessionStorage.publicParams;
+let publicParams = JSON.parse(publicParamsJSON);
+let publicUrl = sessionStorage.publicUrl;
 
-const menu = (
-  <Menu>
-    <Menu.Item key="0">
-      <a href="http://www.alipay.com/">第一个菜单项</a>
-    </Menu.Item>
-    <Menu.Item key="1">
-      <a href="http://www.taobao.com/">第二个菜单项</a>
-    </Menu.Item>
-    <Menu.Divider />
-    <Menu.Item key="3">第三个菜单项</Menu.Item>
-  </Menu>
-);
 
-const columns = [{
-  title: '姓名',
-  dataIndex: 'name',
-  width: 150,
-}, {
-  title: '年龄',
-  dataIndex: 'age',
-  width: 150
-}, {
-  title: '住址',
-  dataIndex: 'address'
-}];
-
-const data = [];
-for (let i = 0; i < 100; i++) {
-  data.push({
-    key: i,
-    name: `李大嘴${i}`,
-    age: 32,
-    address: `西湖区湖底公园${i}号`
+window.deleteRoomComment = function (i) {
+  console.log(window.roomCheck[i]);
+  publicParams.service = 'Admin.DeleteRoomContent';
+  publicParams.content_id = window.roomCheck[i].id;
+  reqwest({
+    url: publicUrl,
+    method: 'get',
+    data: publicParams,
+    type: 'jsonp',
+    withCredentials: true,
+    success: (result) => {
+      console.log(result);
+      if(result.data.code == 0) {
+        message.success('删除评论成功');
+        $(`#x${i}`).fadeOut();
+      }
+    },
+    error: (err) => {
+      console.log(err);
+      switch (err.status) {
+        case 404:
+          message.error('获取数据失败，请联系官方人员！');
+          break;
+        default:
+          message.error('获取数据失败，请刷新重试！');
+          break;
+      }
+    }
   });
-}
-
-const backImg = {
-  //backgroundImage:'url('+imgUrl+')',
-  backgroundColor:'#fff',
-  alignItems:'center'
 };
 
-const commentList = {
-  user:'小兔子',
-  time:'2016-12-12',
-  comment:'u are a big pig u are a big pig u are a big pig u are a big pig u are a big pig u are a big pig '
-};
 class VideoCheck extends React.Component{
 
   constructor() {
     super();
+
+    this.fetch = this.fetch.bind(this);
   }
 
-  handleClick(e) {
-    console.log($('#video1'));
-    //e.target.play();
-    if(e.target.paused){
-      e.target.play();
-    }else{
-      e.target.pause();
-    }
-  }
-
-  scrollSide() {
-    let videoBox = $('.video-check-right-m');
-    let scrollHeight = videoBox.scrollTop();
-    const rightHeight = videoBox.height();
-
-    let lastComment = $('.video-check-right-comment');
-    let lastboxHeight = lastComment.last().get(0).offsetTop+Math.floor(lastComment.last().height()/2);
-
-    console.log(scrollHeight,rightHeight,lastboxHeight);
-    if(scrollHeight+rightHeight > lastboxHeight-100){
-      let box = $('<div>').addClass('video-check-right-comment').appendTo($('.video-check-right-m'));
-
-      let content = $('<div>').html(
-        `<div class="video-check-right-comment">
-            <Row>
-              <div class="col-2 video-check-right-commentList">${commentList.user}</div>
-              <div class="col-2 video-check-right-commentList">头像</div>
-              <div class="col-16 video-check-right-commentList">${commentList.time}</div>
-              <div class="col-4 video-check-right-commentList"><i class=" anticon anticon-exclamation-circle-o"></i>&nbsp;&nbsp;&nbsp;&nbsp;<i class=" anticon anticon-lock"></i></div>
-            </Row>
-            <div class="video-check-right-commentDetail">
-              ${commentList.comment}
+  renderComments() {
+    const contentList = window.roomCheck;
+    var comments = '';
+    if(window.roomCheck) {
+      //对某用户禁言
+      for (var i=0;i<window.roomCheck.length;i++){
+        comments += `
+        <div id="x${i}" class="comments">
+          <Row>
+            <div class="col-2 commentList borderTopLeft">
+            ${contentList[i].name}
             </div>
-          </div>`
-      ).appendTo(box);
+            <div class="col-2 commentList" >
+            <img src=${contentList[i].icon_url} />
+            </div>
+            <div class="col-16 commentList" style="text-align: left">
+            ${contentList[i].create_time}
+            </div>
+            <div class="col-4 commentList borderTopRight" >
+              <i onclick="window.deleteRoomComment(${i})" class="anticon anticon-delete commentListRight"></i>
+            </div>
+          </Row>
+          <div style="margin-left: 5px">
+            ${contentList[i].content}
+          </div>
+        </div>
+          `
+      }
     }
+    return {__html: comments};
   }
 
-  componentDidMount() {
-    console.log(window.roomCheck);
+  fetch() {
+
   }
 
   render() {
@@ -118,132 +108,16 @@ class VideoCheck extends React.Component{
           <div className="col-1 col-offset-23" style={{backgroundColor:'#fff',marginTop:'1rem'}}>.</div>
         </header>
         <Row>
-            <div onScroll={this.scrollSide} className=" video-check-right col-11 ">
-
-              <Row>
-                <p className="col-24">直播列表</p>
-              </Row>
-              <div className="video-check-right-m">
-                <div className="video-check-right-comment">
-                  <Row>
-                    <div className="col-4 video-check-right-commentList" >{commentList.user}</div>
-                    <div className="col-16 video-check-right-commentList">{commentList.time}</div>
-                    <div className="col-4 video-check-right-commentList"><Icon type="exclamation-circle-o" />&nbsp;&nbsp;&nbsp;&nbsp;<Icon type="lock" /></div>
-                  </Row>
-                  <div className="video-check-right-commentDetail">
-                    {commentList.comment}
-                  </div>
-                </div>
-                <div className="video-check-right-comment">
-                  <Row>
-                    <div className="col-4 video-check-right-commentList">{commentList.user}</div>
-                    <div className="col-16 video-check-right-commentList">{commentList.time}</div>
-                    <div className="col-4 video-check-right-commentList" ><Icon type="exclamation-circle-o" />&nbsp;&nbsp;&nbsp;&nbsp;<Icon type="lock" /></div>
-                  </Row>
-                  <div className="video-check-right-commentDetail">
-                    {commentList.comment}
-                  </div>
-                </div>
-                <div className="video-check-right-comment">
-                  <Row>
-                    <div className="col-4 video-check-right-commentList">{commentList.user}</div>
-                    <div className="col-16 video-check-right-commentList">{commentList.time}</div>
-                    <div className="col-4 video-check-right-commentList"><Icon type="exclamation-circle-o" />&nbsp;&nbsp;&nbsp;&nbsp;<Icon type="lock" /></div>
-                  </Row>
-                  <div className="video-check-right-commentDetail">
-                    {commentList.comment}
-                  </div>
-                </div>
-                <div className="video-check-right-comment">
-                  <Row>
-                    <div className="col-4 video-check-right-commentList">{commentList.user}</div>
-                    <div className="col-16 video-check-right-commentList">{commentList.time}</div>
-                    <div className="col-4 video-check-right-commentList"><Icon type="exclamation-circle-o" />&nbsp;&nbsp;&nbsp;&nbsp;<Icon type="lock" /></div>
-                  </Row>
-                  <div className="video-check-right-commentDetail">
-                    {commentList.comment}
-                  </div>
-                </div>
-                <div className="video-check-right-comment">
-                  <Row>
-                    <div className="col-4 video-check-right-commentList">{commentList.user}</div>
-                    <div className="col-16 video-check-right-commentList">{commentList.time}</div>
-                    <div className="col-4 video-check-right-commentList"><Icon type="exclamation-circle-o" />&nbsp;&nbsp;&nbsp;&nbsp;<Icon type="lock" /></div>
-                  </Row>
-                  <div className="video-check-right-commentDetail">
-                    {commentList.comment}
-                  </div>
-                </div>
-                <div className="video-check-right-comment">
-                  <Row>
-                    <div className="col-4 video-check-right-commentList">{commentList.user}</div>
-                    <div className="col-16 video-check-right-commentList">{commentList.time}</div>
-                    <div className="col-4 video-check-right-commentList"><Icon type="exclamation-circle-o" />&nbsp;&nbsp;&nbsp;&nbsp;<Icon type="lock" /></div>
-                  </Row>
-                  <div className="video-check-right-commentDetail">
-                    {commentList.comment}
-                  </div>
-                </div>
-              </div>
-          </div>
-
-          <div onScroll={this.scrollSide} className=" video-check-right col-11 col-offset-1">
-            <Row>
-              <p className="col-24">评论列表</p>
-            </Row>
-            <div className="video-check-right-m">
-              <div className="video-check-right-comment">
-                <Row>
-                  <div className="col-4 video-check-right-commentList">{commentList.user}</div>
-                  <div className="col-16 video-check-right-commentList">{commentList.time}</div>
-                  <div className="col-4 video-check-right-commentList"><Icon type="exclamation-circle-o" />&nbsp;&nbsp;&nbsp;&nbsp;<Icon type="lock" /></div>
-                </Row>
-                <div className="video-check-right-commentDetail">
-                  {commentList.comment}
-                </div>
-              </div>
-              <div className="video-check-right-comment">
-                <Row>
-                  <div className="col-4 video-check-right-commentList">{commentList.user}</div>
-                  <div className="col-16 video-check-right-commentList">{commentList.time}</div>
-                  <div className="col-4 video-check-right-commentList"><Icon type="exclamation-circle-o" />&nbsp;&nbsp;&nbsp;&nbsp;<Icon type="lock" /></div>
-                </Row>
-                <div className="video-check-right-commentDetail">
-                  {commentList.comment}
-                </div>
-              </div>
-              <div className="video-check-right-comment">
-                <Row>
-                  <div className="col-4 video-check-right-commentList">{commentList.user}</div>
-                  <div className="col-16 video-check-right-commentList">{commentList.time}</div>
-                  <div className="col-4 video-check-right-commentList"><Icon type="exclamation-circle-o" />&nbsp;&nbsp;&nbsp;&nbsp;<Icon type="lock" /></div>
-                </Row>
-                <div className="video-check-right-commentDetail">
-                  {commentList.comment}
-                </div>
-              </div>
-              <div className="video-check-right-comment">
-                <Row>
-                  <div className="col-4 video-check-right-commentList">{commentList.user}</div>
-                  <div className="col-16 video-check-right-commentList">{commentList.time}</div>
-                  <div className="col-4 video-check-right-commentList"><Icon type="exclamation-circle-o" />&nbsp;&nbsp;&nbsp;&nbsp;<Icon type="lock" /></div>
-                </Row>
-                <div className="video-check-right-commentDetail">
-                  {commentList.comment}
-                </div>
-              </div>
-              <div className="video-check-right-comment">
-                <Row>
-                  <div className="col-4 video-check-right-commentList">{commentList.user}</div>
-                  <div className="col-16 video-check-right-commentList">{commentList.time}</div>
-                  <div className="col-4 video-check-right-commentList"><Icon type="exclamation-circle-o" />&nbsp;&nbsp;&nbsp;&nbsp;<Icon type="lock" /></div>
-                </Row>
-                <div className="video-check-right-commentDetail">
-                  {commentList.comment}
-                </div>
-              </div>
+          <Col span="11">
+            <h2>直播列表</h2>
+            <br/>
+            <div className=" video-check-right" style={{overflow:'auto'}}>
+              <div dangerouslySetInnerHTML={this.renderComments()} />
             </div>
-          </div>
+          </Col>
+          <Col span="11" offset="1">
+            <PublicComments />
+          </Col>
         </Row>
       </div>
     )

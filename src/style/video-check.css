@@ -30,7 +30,8 @@
   min-width: 400px;
 }
 .video-check-right .video-check-right-m {
-  height: 35rem;
+  height: 37rem;
+  overflow: auto;
   overflow-x: hidden !important;
 }
 .video-check-right .video-check-right-m .video-check-right-comment {

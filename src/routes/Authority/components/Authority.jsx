@@ -21,7 +21,8 @@ import {
   Form,
   Popover,
   Select,
-  Popconfirm
+  Popconfirm,
+  Spin
 } from 'antd';
 
 //全局链接
@@ -44,6 +45,7 @@ class Authority extends React.Component{
       selectedRowKeys: [],
       selectedRows: [],
       record :{},
+      spin:true
     };
     this.handleConfirm = this.handleConfirm.bind(this);
     this.handleClick = this.handleClick.bind(this);
@@ -57,6 +59,7 @@ class Authority extends React.Component{
       [{
         title: 'ID',
         dataIndex: 'id',
+        sorter: (a, b) => a.id - b.id,
         render: text => <p>{text}</p>
       }, {
         title: '头像',
@@ -67,6 +70,7 @@ class Authority extends React.Component{
       }, {
         title: '添加时间',
         dataIndex: 'reg_time',
+        sorter: (a, b) => a.reg_time - b.reg_time,
         render:(text,record) =>
           moment.unix(text).format('YYYY-MM-DD')
       },{
@@ -74,7 +78,7 @@ class Authority extends React.Component{
         render: (text, record) =>
           <span>
             <Popconfirm
-              title="确定要删除这个篇评论吗？"
+              title="确定要删除该管理员吗？"
               onConfirm={this.deleteClick.bind(this, record.id,record)}
             >
               <a href="javasript:;">删除</a>
@@ -243,7 +247,7 @@ class Authority extends React.Component{
           this.setState({
             data: data
           });
-          message.success('您已删除该评论');
+          message.success('您已删除该管理员');
         }
       },
       error: (err) => {
@@ -270,15 +274,23 @@ class Authority extends React.Component{
           if (result.data.admins) {
             console.log(result.data.admins);
             this.setState({
-              data:result.data.admins,
+              spin:false,
+              data:result.data.admins
             });
         }
         else {//添加管理员
           console.log(result);
           this.getAdmins();
-          this.setState({
-            data : this.state.data
-          });
+          if(result.data.code == 1) {
+            message.error('用户名已经存在');
+            return ;
+          }
+            if(result.data.code == 0) {
+              message.success('管理员添加成功');
+              this.setState({
+                data : this.state.data
+              });
+            }
         }
       },
       error: (err) => {
@@ -306,7 +318,7 @@ class Authority extends React.Component{
   }
 
   render() {
-    const {selectedRowKeys } = this.state;
+    const {selectedRowKeys, spin } = this.state;
     const { getFieldProps } = this.props.form;
     // 通过 rowSelection 对象表明需要行选择
     const rowSelection = {
@@ -316,7 +328,7 @@ class Authority extends React.Component{
       onSelectAll: this.onSelectAll.bind(this)
     };
     return(
-      <div>
+      <Spin spining={spin}>
         <header className="ant-video-header">
           {/*与Article同步CSS代码*/}
           <header className="article-right-header">
@@ -352,7 +364,7 @@ class Authority extends React.Component{
                 <div id="handle-add-admin" style={{visibility:'hidden'}}>
                     <Row>
                       <div key="a" className="col-24 handle-add-admin-input-border">
-                        <Input id="loginInput" style={{width:'100%'}} placeholder="登陆名"/>
+                        <Input id="loginInput" maxLength="25" style={{width:'100%'}} placeholder="登陆名"/>
                       </div>
                     </Row>
                     <Row>
@@ -386,7 +398,7 @@ class Authority extends React.Component{
           </section>
         </article>
         <footer className="ant-video-footer" />
-      </div>
+      </Spin>
     )
   }
 }

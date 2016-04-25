@@ -17,7 +17,8 @@ import {
   Popover,
   Select,
   Pagination,
-  Tag
+  Tag,
+  Spin
 } from 'antd';
 //全局链接
 let publicParamsJSON = sessionStorage.publicParams;
@@ -29,7 +30,8 @@ class LiveRoom extends React.Component{
   constructor() {
     super();
     this.state = {
-      total:1
+      total:1,
+      spin:true
     };
     this.getRooms = this.getRooms.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -78,7 +80,7 @@ class LiveRoom extends React.Component{
       render:function(text,record) {
         return (
           <span>
-            <Button onClick={this.getRoomContent.bind(this,record.id)} type="ghost"><Icon type="play-circle-o" />查看/审核直播</Button>
+            <Button onClick={this.getRoomContent.bind(this,record.id,record)} type="ghost"><Icon type="play-circle-o" />查看/审核直播</Button>
             <Button onClick={this.getRoomItem.bind(this,record.id)} type="ghost"><Icon type="setting"/></Button>
             <Button type="ghost">推荐</Button>
           </span>
@@ -90,12 +92,20 @@ class LiveRoom extends React.Component{
   getRoomItem(room_id) {
     publicParams.service = 'Admin.GetRoom';
     publicParams.room_id = room_id;
+    window.roomId = room_id;
     this.fetch();
   }
 
-  getRoomContent(room_id) {
+  getRoomContent(room_id,record) {
+    //获取直播间的直播内容
     publicParams.service = 'Admin.GetRoomContent';
     publicParams.room_id = room_id;
+    window.record = record;
+    this.fetch();
+    //获取评论列表
+    publicParams.service = 'Admin.GetComments';
+    publicParams.type = 3;
+    publicParams.id = room_id;
     this.fetch();
   }
 
@@ -107,15 +117,16 @@ class LiveRoom extends React.Component{
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        console.log(result.data);
         if (result.data.rooms) {
           this.setState({
+            spin:false,
             data:result.data.rooms
           });
           //存值到sessionStorage
         }
         if (result.data.num) {
             this.setState({
+              spin:false,
               total:result.data.num
             })
         }
@@ -123,8 +134,14 @@ class LiveRoom extends React.Component{
             window.room = result.data.room;
             window.location.href = '/#/new-live-room'
         }
+        //获取直播间的直播内容
         if(result.data.content) {
           window.roomCheck = result.data.content;
+          window.location.href = '/#/room-check'
+        }
+        //获取评论列表
+        if(result.data.comments) {
+          window.comments = result.data.comments;
           window.location.href = '/#/room-check'
         }
 
@@ -171,11 +188,11 @@ class LiveRoom extends React.Component{
   }
 
   render() {
-    const{ data } = this.state;
+    const{ data, spin } = this.state;
     const { getFieldProps } = this.props.form;
 
     return(
-      <div>
+      <Spin spining={spin}>
         <header className="ant-video-header">
           {/*与Article同步CSS代码*/}
           <header className="article-right-header">
@@ -207,14 +224,19 @@ class LiveRoom extends React.Component{
           {/*主体内容*/}
           <section className="article-right-content">
             <div style={{width:'2rem',height:'2rem'}}></div>
-            <Table rowSelection={null} pagination = {false} dataSource={data} columns={this.columns()} />
+            <Table rowSelection={null}
+                   pagination = {{
+                   defaultCurrent:1,
+                   onChange:this.handleChange,
+                   total:this.state.total}}
+                   dataSource={data}
+                   columns={this.columns()} />
             <br />
-            <Pagination onChange={this.handleChange} defaultCurrent={1} total={this.state.total} />,
           </section>
         </article>
         <footer className="ant-video-footer">
         </footer>
-      </div>
+      </Spin>
     )
   }
 }

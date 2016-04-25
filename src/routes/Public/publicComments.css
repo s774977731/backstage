@@ -1,0 +1,36 @@
+.comments {
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
+  background-color: #f4f4f4;
+  color: black;
+  height: 9rem;
+  margin-bottom: 1rem;
+}
+.commentList {
+  height: 3rem;
+  line-height: 3rem;
+  text-align: center;
+  background-color: #EBEBEB;
+  color: dimgray;
+}
+.commentListRight {
+  cursor: pointer;
+  font-size: 1.5rem;
+  text-align: right;
+}
+.border-radius {
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
+}
+.borderTopLeft {
+  border-top-left-radius: 5px;
+}
+.borderTopRight {
+  border-top-right-radius: 5px;
+}
