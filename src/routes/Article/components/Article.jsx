@@ -40,11 +40,11 @@ class Article extends React.Component {
       record: {},
       spin: true,
       operate: false,
-      total:1
+      total:1,
+      recommend:false
     };
     this.handleClick = this.handleClick.bind(this);
     this.onSelectChange = this.onSelectChange.bind(this);
-    this.start = this.start.bind(this);
     this.handleClickDelete = this.handleClickDelete.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.fetch = this.fetch.bind(this);
@@ -95,26 +95,53 @@ class Article extends React.Component {
                 title="确定要删除这个篇文章吗？"
                 onConfirm={this.deleteClick.bind(this, record.article_id)}
               >
-                <a href="javasript:;">删除</a>
+                <a href="javascript:;">删除</a>
               </Popconfirm>
               <span className="ant-divider" />
-              <a>推荐</a>
+              <a onClick={this.recommend.bind(this,record,record.article_id)}>{record.recommended == 1 ? '取消推荐' : '推荐'}</a>
             </span>
         }])
   }
 
-  start() {
-    this.setState({
-      loading: true
+  recommend(record,id) {
+    if(record.recommended == 1) {
+      publicParams.service = 'Admin.Unrecommend';
+    }else {
+      publicParams.service = 'Admin.Recommend';
+    }
+    publicParams.type = 1;
+    publicParams.id = id;
+    reqwest({
+      url: publicUrl,
+      method: 'get',
+      data: publicParams,
+      type: 'jsonp',
+      withCredentials: true,
+      success: (result) => {
+        this.getArticles();
+        setTimeout(function () {
+          if(record.recommended == 0) {
+            message.success('推荐成功')
+          }else{
+            message.success('取消推荐成功')
+          }
+        },700)
+      },
+      error: (err) => {
+        console.log(err);
+        this.setState({ loading: false });
+        switch (err.status) {
+          case 404:
+            message.error('获取数据失败，请联系官方人员！');
+            break;
+          default:
+            message.error('获取数据失败，请刷新重试！');
+            break;
+        }
+      }
     });
-    //模拟 ajax 请求，完成后清空
-    setTimeout(() => {
-      this.setState({
-        selectedRowKeys: [],
-        loading: false
-      });
-    }, 1000);
   }
+
 
   onSelectChange(selectedRowKeys) {
     console.log('selectedRowKeys changed: ', selectedRowKeys);
@@ -280,6 +307,7 @@ class Article extends React.Component {
             spin:false,
             data:result.data.articles
           });
+          console.log(this.state.data);
         }
         if (result.data.num) {
           this.setState({
@@ -407,6 +435,7 @@ class Article extends React.Component {
             <Col span="2">
               <div
                 className="operate-button-delete"
+                onClick={this.recommend}
                 style={operate?{visibility:'visible'}:{visibility:'hidden'}}>
                 推荐
               </div>

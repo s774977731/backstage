@@ -72,9 +72,6 @@ class NewLiveRoom extends React.Component{
       },  {
         title: '用户名',
         dataIndex: 'user_name',
-        getCheckboxProps(record){
-
-        }
       },{
         className:'text-right',
         render:(text,record) => <div>

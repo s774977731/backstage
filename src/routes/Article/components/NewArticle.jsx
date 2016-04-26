@@ -238,7 +238,7 @@ class NewArticle extends React.Component{
             <TabPane tab="编辑内容" key="1" >
               <ReactQuill theme="snow"
                           style={{height:'250px'}}
-                          value={this.state.text}
+                          value={this.state.text || '输入文章内容'}
                           onChange={this.onTextChange} />
             </TabPane>
             <TabPane tab="跳转链接" key="2" >

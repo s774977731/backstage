@@ -3,7 +3,6 @@ import { Link } from 'react-router';
 import reqwest from 'reqwest';
 import publicComments from './publicComments.css';
 
-
 import {
   Row,
   Col,
@@ -28,8 +27,7 @@ let publicUrl = sessionStorage.publicUrl;
 //对某用户禁言/取消禁言
 window.disableUserComment = function(i) {
   //console.log(window.comments[i]);
-  var searchContent = JSON.parse(sessionStorage.searchContent);
-  console.log(searchContent[i]);
+  //console.log(searchContent[i]);
   if(window.comments[i]) {
     publicParams.uid = window.comments[i].user_id;
     switch (Number(window.comments[i].audit)) {
@@ -43,6 +41,7 @@ window.disableUserComment = function(i) {
   }
   else {
     //对评论进行搜索
+    var searchContent = JSON.parse(sessionStorage.searchContent);
     publicParams.uid = searchContent[i].user_id;
     switch (Number(searchContent[i].audit)) {
       case 0:
@@ -66,7 +65,8 @@ window.disableUserComment = function(i) {
           if(window.comments[i]) {
             getComments();
             auditNumber = Number(window.comments[i].audit);
-          }else {
+          }
+          else {
             getSearchComment();
             searchContent = JSON.parse(sessionStorage.searchContent);
             auditNumber = Number(searchContent[i].audit);
@@ -182,6 +182,7 @@ function getSearchComment() {
     }
   });
 }
+
 
 class PublicComments extends React.Component{
 

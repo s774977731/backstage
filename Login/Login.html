@@ -46,7 +46,6 @@
                         <input type="password" name="password" id="inputPassword" class="form-control" placeholder="请输入密码">
                         <div style="margin-bottom: 2.5rem;text-align: right">
                             <span id="checkPhone" style=";color: #F04042" ></span>
-                            <a id="forgetPassword" style="text-decoration: none" href="#">忘记密码？</a>
                         </div>
                         <button id="loginBtn" class="btn btn-lg btn-primary btn-block" type="submit">登录</button>
                     </form>
@@ -62,70 +61,6 @@
                 </div>
             </div>
         </fieldset>
-        <!--忘记密码-->
-        <fieldset id="forgetPass" style="display: none">
-            <h3 style="text-align: center">忘记密码</h3>
-            <hr />
-            <form class="col-sm-6 col-sm-offset-3">
-                <div class="form-group col-sm-12">
-                    <label for="phoneNum">手机号:</label>
-                    <input type="tel" class="form-control" id="phoneNum" name="phone" required
-                           placeholder="请输入手机号"
-                           maxlength="11" minlength="11">
-                    <p class="help-block" id="checkNumHelp" style="color: #F04042"></p>
-                </div>
-                <div>
-                    <label class="col-sm-12" for="captchaInput">验证码:</label>
-                    <div class="col-sm-6" style="margin-bottom: 2rem">
-                        <input id="captchaInput" class="form-control"/>
-                    </div>
-                    <div class="col-sm-6">
-                        <button class="btn btn-primary btn-block" id="Btn_SMS_Reg" style="overflow: hidden;height: 40px">获取验证码</button>
-                    </div>
-                    <p class="col-sm-6" id="checkCode" style="color: #F04042;margin-top: 1rem"></p>
-                </div>
-                <div class="form-group col-sm-12" style="margin-top: 10rem">
-                    <button id="confirm" type="submit" class="btn btn-lg btn-primary btn-block next">确定</button>
-                </div>
-            </form>
-        </fieldset>
-        <fieldset id="resetPass" style="display: none">
-            <h3 style="text-align: center">重置密码</h3>
-            <hr />
-            <form class="col-sm-6 col-sm-offset-3">
-                <div class="form-group col-sm-12">
-                    <label for="phonePass">新密码:</label>
-                    <input type="password" class="form-control" id="phonePass" name="phone" required
-                           placeholder="请输入6-20个字符的密码"
-                           maxlength="20">
-                    <br />
-                    <label for="rePhonePass">确认密码:</label>
-                    <input type="password" class="form-control" id="rePhonePass" name="phone" required
-                           placeholder="在输入一次，不要忘记喽"
-                           maxlength="20">
-                    <p id="checkLength" style="color: #F04042;margin-top: 1rem"></p>
-                    <br />
-                </div>
-                <div class="form-group col-sm-12" style="margin-top: 10rem">
-                    <button id="reset" type="button" class="btn btn-lg btn-primary btn-block next">重置密码</button>
-                </div>
-            </form>
-        </fieldset>
-        <div class="modal fade bs-example-modal-sm" id="getModal">
-            <div class="modal-dialog  modal-sm">
-                <div class="modal-content">
-                    <br />
-                    <div class="modal-header">
-                        <h4 class="modal-title">密码修改成功</h4>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" id="PassConfirm" data-dismiss="modal">确定</button>
-                    </div>
-                </div>
-                <!-- /.modal-content -->
-            </div>
-            <!-- /.modal-dialog -->
-        </div>
     </div>
 </div>
 

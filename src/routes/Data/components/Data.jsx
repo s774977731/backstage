@@ -119,7 +119,7 @@ class DataCenter extends React.Component{
             <Col span="8">
               <div className="div"  onMouseOver={this.handleMouseOver} onMouseOut={this.handleOnMouseOut}>
                 <h1>1</h1>
-                <h3 style={{marginTop:'-8rem'}}>昨日新增</h3>
+                <h3 style={{marginTop:'-8rem'}}>新增用户</h3>
               </div>
               <div className="triangle" style={{display:'none'}}></div>
             </Col>
@@ -153,7 +153,7 @@ class DataCenter extends React.Component{
         </div>
         <div>
           <div style={{marginBottom:'2rem'}}>
-            <span style={{fontSize:'1.8rem',marginRight:'1rem'}}>昨日新增</span>
+            <span style={{fontSize:'1.8rem',marginRight:'1rem'}}>新增用户</span>
             <RadioGroup defaultValue="a" size="large">
               <RadioButton value="a">三天</RadioButton>
               <RadioButton value="b">一星期</RadioButton>

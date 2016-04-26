@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router';
 import reqwest from 'reqwest';
+import recommend from '../../Public/PublicComments.jsx';
 const moment = require('moment');
 moment.locale('zh-cn');
 
@@ -18,7 +19,8 @@ import {
   Select,
   Pagination,
   Tag,
-  Spin
+  Spin,
+  message
 } from 'antd';
 //全局链接
 let publicParamsJSON = sessionStorage.publicParams;
@@ -41,20 +43,25 @@ class LiveRoom extends React.Component{
   columns() {
     return[{
       title: 'ID',
+      width:'10%',
       dataIndex: 'id'
     }, {
       title: '标题',
+      width:'15%',
       dataIndex: 'name'
     }, {
       title: '创建时间',
+      width:'15%',
       dataIndex: 'create_time',
       render:(text,record) =>
         moment.unix(text).format('YYYY-MM-DD')
     },{
       title: '开播时间',
+      width:'15%',
       dataIndex: 'start'
     },{
       title: '直播状态',
+      width:'10%',
       dataIndex: 'status',
       render:  function (text) {
         if(text == 1) {
@@ -69,6 +76,7 @@ class LiveRoom extends React.Component{
       }
     }, {
       title: '评论权限',
+      width:'10%',
       dataIndex: 'audit',
       render: (text) =>
       <div>
@@ -82,11 +90,52 @@ class LiveRoom extends React.Component{
           <span>
             <Button onClick={this.getRoomContent.bind(this,record.id,record)} type="ghost"><Icon type="play-circle-o" />查看/审核直播</Button>
             <Button onClick={this.getRoomItem.bind(this,record.id)} type="ghost"><Icon type="setting"/></Button>
-            <Button type="ghost">推荐</Button>
+            <Button type="ghost" onClick={this.recommend.bind(this,record,record.id)}>{record.recommend == 1 ? '取消推荐' : '推荐'}</Button>
           </span>
         );
       }.bind(this)
     }]
+  }
+
+  recommend(record,id) {
+    console.log(record.recommend);
+    if(record.recommend == 1) {
+      publicParams.service = 'Admin.Unrecommend';
+    }else {
+      publicParams.service = 'Admin.Recommend';
+    }
+    publicParams.type = 3;
+    publicParams.id = id;
+    reqwest({
+      url: publicUrl,
+      method: 'get',
+      data: publicParams,
+      type: 'jsonp',
+      withCredentials: true,
+      success: (result) => {
+        console.log(result);
+        this.getRooms();
+        setTimeout(function () {
+          if(record.recommend == 0) {
+            message.success('推荐成功')
+          }else{
+            message.success('取消推荐成功')
+          }
+        },700)
+      },
+      error: (err) => {
+        console.log(err);
+        this.setState({ loading: false });
+        switch (err.status) {
+          case 404:
+            message.error('获取数据失败，请联系官方人员！');
+            break;
+          default:
+            message.error('获取数据失败，请刷新重试！');
+            break;
+        }
+      }
+    });
   }
 
   getRoomItem(room_id) {
@@ -122,6 +171,7 @@ class LiveRoom extends React.Component{
             spin:false,
             data:result.data.rooms
           });
+          console.log(result.data.rooms);
           //存值到sessionStorage
         }
         if (result.data.num) {
