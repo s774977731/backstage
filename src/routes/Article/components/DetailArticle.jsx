@@ -24,14 +24,25 @@ class DetailArticle extends React.Component{
 
   renderContent() {
     if(window.article) {
-      return  {__html:`${String(window.article.content).length > 0}` ? `${window.article.content}` : `<div><br/><p>没有文章详情</p></div>`}
+      if(window.article.type == 1) {
+        var content = window.article.content;
+        return { __html: content }
+      }else {
+        var content = window.article.article_url;
+        console.log(content);
+        //return { __html: `<a href=${content} target="_blank"><p>${content}</p></a>` }
+        return { __html: `<iframe src=${content} frameborder="0" style="width: 100%;height: 570px"></iframe>` }
+      }
+
     }else {
       return  {__html: `<div><br/><p>没有文章详情</p></div>`}
     }
   }
 
-  componentDidMount(){
 
+
+  componentDidMount(){
+    //console.log(window.article,22222)
   }
 
   render() {
@@ -42,13 +53,14 @@ class DetailArticle extends React.Component{
             <article className="video-check-left" >
               <Row>
                 <h3>文章内容</h3>
+                {/*<p><a href="#/new-article">更新文章</a></p>*/}
               </Row>
-              <div style={{height:'44rem',overflow:'auto',overflowX:'hidden'}}>
+              <div style={{height:'57rem',overflow:'auto',overflowX:'hidden'}}>
                 <div dangerouslySetInnerHTML={this.renderContent()} ></div>
               </div>
             </article>
           </Col>
-          <Col span="11" offset="1">
+          <Col span="11" offset="2">
             <PublicComment />
           </Col>
         </Row>

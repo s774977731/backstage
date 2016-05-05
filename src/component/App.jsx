@@ -65,7 +65,7 @@ class App extends Component {
       <article className="ant-layout-main">
         {/*这里左边*/}
         <aside className = 'ant-layout-left'>
-          <header className = "ant-layout-logo">新媒体方案</header>
+          <header className = "ant-layout-logo"><p style={{fontSize:'1.5rem'}}>直播温州</p></header>
           <Menu onClick = {this.handleClick}
                 theme="dark"
                 defaultOpenKeys = {['sub2','sub3']}
@@ -111,11 +111,9 @@ class App extends Component {
               {this.props.children}
             </div>
           </div>
-          <div className="ant-layout-footer">
-            Ant Design 版权所有 © 2015 由蚂蚁金服体验技术部支持
-          </div>
         </div>
       </article>
+
     );
   }
 }

@@ -32,11 +32,14 @@ class LiveVideo extends React.Component{
     super();
     this.state = {
       total:1,
-      spin:true
+      spin:true,
+      search:'title'
     };
     this.getVideos = this.getVideos.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.getVideoNum = this.getVideoNum.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.changeSearch = this.changeSearch.bind(this);
   }
 
   columns() {
@@ -44,32 +47,43 @@ class LiveVideo extends React.Component{
       title: 'ID',
       width:'10%',
       dataIndex: 'id'
+    },{
+      title: '头图',
+      width:'10%',
+      dataIndex: 'cover',
+      render:(text) => <img src={text} width="30"/>
     }, {
       title: '标题',
-      width:'15%',
+      width:'10%',
       dataIndex: 'name'
     }, {
       title: '创建时间',
-      width:'15%',
+      width:'10%',
       dataIndex: 'create_time',
       render:(text,record) =>
         moment.unix(text).format('YYYY-MM-DD')
     },{
       title: '开播时间',
-      width:'15%',
-      dataIndex: 'start'
+      width:'10%',
+      dataIndex: 'play_time',
+      render:(text,record) =>
+        moment.unix(text).format('YYYY-MM-DD')
     },{
       title: '直播状态',
       width:'10%',
       dataIndex: 'status',
-      render:  function (text) {
+      render:  function (text,record) {
         if(text == 1) {
+          record.delete = true;
           return <Tag color="green">未开播</Tag>
         }else if(text == 2) {
+          record.delete = false;
           return <Tag style={{backgroundColor:'red',color:'white'}}>正在直播</Tag>
         }else if(text == 3) {
+          record.delete = true;
           return <Tag color="blue">已结束</Tag>
         }else {
+          record.delete = true;
           return <Tag color="yellow">无效</Tag>
         }
       }
@@ -87,9 +101,9 @@ class LiveVideo extends React.Component{
       render:function(text,record) {
         return (
           <span>
-            <Button onClick={this.getRoomContent.bind(this,record.id,record)} type="ghost"><Icon type="play-circle-o" />查看/审核直播</Button>
-            <Button onClick={this.getVideoItem.bind(this,record.id)} type="ghost"><Icon type="setting"/></Button>
-            <Button type="ghost" onClick={this.recommend.bind(this,record,record.id)}>{record.recommend == 1 ? '取消推荐' : '推荐'}</Button>
+            <Button onClick={this.getVideoContent.bind(this,record.id,record)} type="ghost"><Icon type="play-circle-o" />查看/审核直播</Button>
+            <Button onClick={this.getVideoItem.bind(this,record.id,record)} type="ghost"><Icon type="setting"/></Button>
+            <Button type="ghost" onClick={this.recommend.bind(this,record,record.id)}>{record.recommend == 1 ? '取消' : '推荐'}</Button>
           </span>
         );
       }.bind(this)
@@ -117,7 +131,7 @@ class LiveVideo extends React.Component{
         setTimeout(function () {
           if(record.recommend == 0) {
             message.success('推荐成功')
-          }else{
+          }else {
             message.success('取消推荐成功')
           }
         },700)
@@ -137,23 +151,64 @@ class LiveVideo extends React.Component{
     });
   }
 
-  getVideoItem(video_id) {
+  changeSearch(value) {
+    console.log(value);
+    this.setState({
+      search:value
+    })
+  }
+
+  handleSubmit(e) {
+    const { search } = this.state;
+    e.preventDefault();
+    this.props.form.validateFields((errors, values) => {
+      if (!!errors) {
+        console.log('Errors in form!!!');
+        return;
+      }
+      console.log(values.key);
+      if(search == 'title') {
+        publicParams.video_title = values.key;
+        publicParams.service = 'Admin.SearchVideoByTitle';
+      }else {
+        publicParams.video_id = values.key;
+        publicParams.service = 'Admin.SearchVideoById';
+      }
+      reqwest({
+        url: publicUrl,
+        method: 'get',
+        data: publicParams,
+        type: 'jsonp',
+        withCredentials: true,
+        success: (result) => {
+          this.setState({
+            data:result.data.videos,
+            total:result.data.total
+          });
+          console.log(result.data);
+        }
+      });
+    });
+  }
+
+  getVideoItem(video_id,record) {
     publicParams.service = 'Admin.GetVideo';
     publicParams.video_id = video_id;
-    window.Video = video_id;
+    window.videoId = video_id;
+    window.record = record;
     this.fetch();
   }
 
-  getRoomContent(room_id,record) {
+  getVideoContent(video_id,record) {
     //获取直播间的直播内容
-    publicParams.service = 'Admin.GetRoomContent';
-    publicParams.room_id = room_id;
+    publicParams.service = 'Admin.GetVideoContent';
+    publicParams.video_id = video_id;
     window.record = record;
     this.fetch();
     //获取评论列表
     publicParams.service = 'Admin.GetComments';
     publicParams.type = 3;
-    publicParams.id = room_id;
+    publicParams.id = video_id;
     this.fetch();
   }
 
@@ -165,7 +220,6 @@ class LiveVideo extends React.Component{
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        console.log(result.data);
         if (result.data.videos) {
           console.log(result.data.videos);
           this.setState({
@@ -183,19 +237,20 @@ class LiveVideo extends React.Component{
         //Admin.GetVideo
         if(result.data.video) {
           window.video = result.data.video;
-          window.location.href = '/#/new-live-video'
+          window.location.href = '#/new-live-video'
         }
-        //获取直播间的直播内容
+        //获取视频直播内容
         if(result.data.content) {
-          window.roomCheck = result.data.content;
-          window.location.href = '/#/video-check'
+          //console.log(result.data.content.views);
+          window.videoCheck = result.data.content.views;
+          setTimeout(function () {
+            window.location.href = '#/video-check'
+          },100)
         }
         //获取评论列表
         if(result.data.comments) {
           window.comments = result.data.comments;
-          window.location.href = '/#/room-check'
         }
-
       },
       error: (err) => {
         console.log(err);
@@ -213,8 +268,8 @@ class LiveVideo extends React.Component{
   }
 
   handleAddVideo() {
-    window.room = {};
-    window.location.href = '/#/new-live-video'
+    window.video = false;
+    window.location.href = '#/new-live-video'
   }
 
   handleChange(current) {
@@ -254,18 +309,16 @@ class LiveVideo extends React.Component{
               {/*Group*/}
               <Form onSubmit={this.handleSubmit} form={this.props.form}>
                 <Col span="2" offset="1">
-                  <Select defaultValue="all" size="large">
-                    <Option value="all">全部</Option>
-                    <Option value="ID">ID</Option>
-                    <Option value="nickName">昵称</Option>
-                    <Option value="user">账号</Option>
+                  <Select onChange={this.changeSearch} defaultValue="title" size="large">
+                    <Option value="title">标题</Option>
+                    <Option value="id">ID</Option>
                   </Select>
                 </Col>
                 <Col span="3">
                   <Input {...getFieldProps('key')} style={{height:'40px'}} />
                 </Col>
                 <Col span="2">
-                  <Button htmlType="submit" type="ghost" style={{width:'100%',height:'40px'}}>提交</Button>
+                  <Button htmlType="submit" type="ghost" style={{width:'100%',height:'40px'}}>搜索</Button>
                 </Col>
               </Form>
             </Row>
@@ -275,7 +328,8 @@ class LiveVideo extends React.Component{
           {/*主体内容*/}
           <section className="article-right-content">
             <div style={{width:'2rem',height:'2rem'}}></div>
-            <Table rowSelection={null}
+            <Table rowKey = {record => record.id}
+                   rowSelection={null}
                    pagination = {{
                    defaultCurrent:1,
                    onChange:this.handleChange,

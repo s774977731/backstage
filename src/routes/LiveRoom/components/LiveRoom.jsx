@@ -33,11 +33,14 @@ class LiveRoom extends React.Component{
     super();
     this.state = {
       total:1,
-      spin:true
+      spin:true,
+      search:'title'
     };
     this.getRooms = this.getRooms.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.getRoomNum = this.getRoomNum.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.changeSearch = this.changeSearch.bind(this);
   }
 
   columns() {
@@ -45,32 +48,43 @@ class LiveRoom extends React.Component{
       title: 'ID',
       width:'10%',
       dataIndex: 'id'
+    },{
+      title: '头图',
+      width:'10%',
+      dataIndex: 'cover',
+      render:(text) => <img src={text} width="30"/>
     }, {
       title: '标题',
       width:'15%',
       dataIndex: 'name'
     }, {
       title: '创建时间',
-      width:'15%',
+      width:'10%',
       dataIndex: 'create_time',
       render:(text,record) =>
         moment.unix(text).format('YYYY-MM-DD')
     },{
       title: '开播时间',
-      width:'15%',
-      dataIndex: 'start'
+      width:'10%',
+      dataIndex: 'play_time',
+      render:(text,record) =>
+        moment.unix(text).format('YYYY-MM-DD')
     },{
       title: '直播状态',
       width:'10%',
       dataIndex: 'status',
-      render:  function (text) {
+      render:  function (text,record) {
         if(text == 1) {
+          record.delete = true;
           return <Tag color="green">未开播</Tag>
         }else if(text == 2) {
+          record.delete = false;
           return <Tag style={{backgroundColor:'red',color:'white'}}>正在直播</Tag>
         }else if(text == 3) {
+          record.delete = true;
           return <Tag color="blue">已结束</Tag>
         }else {
+          record.delete = true;
           return <Tag color="yellow">无效</Tag>
         }
       }
@@ -90,7 +104,7 @@ class LiveRoom extends React.Component{
           <span>
             <Button onClick={this.getRoomContent.bind(this,record.id,record)} type="ghost"><Icon type="play-circle-o" />查看/审核直播</Button>
             <Button onClick={this.getRoomItem.bind(this,record.id)} type="ghost"><Icon type="setting"/></Button>
-            <Button type="ghost" onClick={this.recommend.bind(this,record,record.id)}>{record.recommend == 1 ? '取消推荐' : '推荐'}</Button>
+            <Button type="ghost" onClick={this.recommend.bind(this,record,record.id)}>{record.recommend == 1 ? '取消' : '推荐'}</Button>
           </span>
         );
       }.bind(this)
@@ -138,6 +152,46 @@ class LiveRoom extends React.Component{
     });
   }
 
+  changeSearch(value) {
+    console.log(value);
+    this.setState({
+      search:value
+    })
+  }
+
+  handleSubmit(e) {
+    const { search } = this.state;
+    e.preventDefault();
+    this.props.form.validateFields((errors, values) => {
+      if (!!errors) {
+        console.log('Errors in form!!!');
+        return;
+      }
+      console.log(values.key);
+      if(search == 'title') {
+        publicParams.room_title = values.key;
+        publicParams.service = 'Admin.SearchRoomByTitle';
+      }else {
+        publicParams.room_id = values.key;
+        publicParams.service = 'Admin.SearchRoomById';
+      }
+      reqwest({
+        url: publicUrl,
+        method: 'get',
+        data: publicParams,
+        type: 'jsonp',
+        withCredentials: true,
+        success: (result) => {
+          this.setState({
+            data:result.data.rooms,
+            total:result.data.total
+          });
+          console.log(result.data);
+        }
+      });
+    });
+  }
+
   getRoomItem(room_id) {
     publicParams.service = 'Admin.GetRoom';
     publicParams.room_id = room_id;
@@ -182,17 +236,17 @@ class LiveRoom extends React.Component{
         }
         if(result.data.room) {
             window.room = result.data.room;
-            window.location.href = '/#/new-live-room'
+            window.location.href = '#/new-live-room'
         }
         //获取直播间的直播内容
         if(result.data.content) {
           window.roomCheck = result.data.content;
-          window.location.href = '/#/room-check'
+          window.location.href = '#/room-check'
         }
         //获取评论列表
         if(result.data.comments) {
           window.comments = result.data.comments;
-          window.location.href = '/#/room-check'
+          window.location.href = '#/room-check'
         }
 
       },
@@ -212,8 +266,8 @@ class LiveRoom extends React.Component{
   }
 
   handleAddRoom() {
-    window.room = {};
-    window.location.href = '/#/new-live-room'
+    window.room = false;
+    window.location.href = '#/new-live-room'
   }
 
   handleChange(current) {
@@ -253,18 +307,16 @@ class LiveRoom extends React.Component{
               {/*Group*/}
               <Form onSubmit={this.handleSubmit} form={this.props.form}>
                 <Col span="2" offset="1">
-                  <Select defaultValue="all" size="large">
-                    <Option value="all">全部</Option>
-                    <Option value="ID">ID</Option>
-                    <Option value="nickName">昵称</Option>
-                    <Option value="user">账号</Option>
+                  <Select onChange={this.changeSearch} defaultValue="title" size="large">
+                    <Option value="title">标题</Option>
+                    <Option value="id">ID</Option>
                   </Select>
                 </Col>
                 <Col span="3">
                   <Input {...getFieldProps('key')} style={{height:'40px'}} />
                 </Col>
                 <Col span="2">
-                    <Button htmlType="submit" type="ghost" style={{width:'100%',height:'40px'}}>提交</Button>
+                    <Button htmlType="submit" type="ghost" style={{width:'100%',height:'40px'}}>搜索</Button>
                 </Col>
               </Form>
             </Row>
@@ -274,7 +326,8 @@ class LiveRoom extends React.Component{
           {/*主体内容*/}
           <section className="article-right-content">
             <div style={{width:'2rem',height:'2rem'}}></div>
-            <Table rowSelection={null}
+            <Table rowKey = {record => record.id}
+                   rowSelection={null}
                    pagination = {{
                    defaultCurrent:1,
                    onChange:this.handleChange,

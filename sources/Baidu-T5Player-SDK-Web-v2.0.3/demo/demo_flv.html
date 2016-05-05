@@ -5,12 +5,13 @@
     <title>Demo: play flv video</title>
 </head>
 <body>
-    <div id="playercontainer"></div>
+    <div style="margin-left: 300px;margin-top:200px"><div id="playercontainer"></div></div>
     <script type="text/javascript" src="../player/cyberplayer.js"></script>
     <script type="text/javascript">
         var player = cyberplayer("playercontainer").setup({
             width: 854,
             height: 480,
+            left:500,
             stretching: "uniform",
             file: "http://demo-video.bj.bcebos.com/AdrenalineRush.flv",
             autostart: false,

@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router';
 import reqwest from 'reqwest';
 import publicComments from './publicComments.css';
+const moment = require('moment');
+moment.locale('zh-cn');
 
 import {
   Row,
@@ -109,7 +111,7 @@ window.deleteCommentList = function (i) {
     }else if(window.key == 3) {
       //视频直播
       publicParams.type = 2;
-
+      publicParams.id = window.contentList[i].comment_id;
     }else if(window.key == 4) {
       //直播间
       publicParams.type = 3;
@@ -140,6 +142,11 @@ function getComments () {
     publicParams.type = 1;
     publicParams.id = window.record.article_id;
   }
+  //视频直播
+  if(window.key == 3) {
+    publicParams.type = 2;
+    publicParams.id = window.record.id;
+  }
   //直播间
   if(window.key == 4) {
     publicParams.type = 3;
@@ -164,6 +171,11 @@ function getSearchComment() {
   if(window.key == 2) {
     publicParams.type = 1;
     publicParams.id = window.record.article_id;
+  }
+  //视频直播
+  if(window.key == 3) {
+    publicParams.type = 2;
+    publicParams.id = window.record.id;
   }
   //直播间
   if(window.key == 4) {
@@ -262,13 +274,13 @@ class PublicComments extends React.Component{
         <div id="y${i}" class="comments">
           <div>
             <div class="col-2 commentList borderTopLeft">
-            ${serchContent[i].nickname}
+              <img style="width:20px;margin-top: 8px" src=${serchContent[i].portrait} />
             </div>
-            <div class="col-2 commentList">
-            <img src=${serchContent[i].portrait} />
+            <div class="col-3 commentList">
+              ${serchContent[i].nickname}
             </div>
-            <div class="col-16 commentList" style="text-align: left">
-            ${serchContent[i].create_time}
+            <div class="col-15 commentList" style="text-align: left">
+            ${moment.unix(contentList[i].create_time).format('YYYY-MM-DD')}
             </div>
             <div class="col-4 commentList borderTopRight" >
               <i id="icon${i}" onclick="window.disableUserComment(${i})" class="anticon anticon-exclamation-circle-o commentListRight"></i>
@@ -291,13 +303,13 @@ class PublicComments extends React.Component{
         <div id="y${i}" class="comments">
           <div>
             <div class="col-2 commentList borderTopLeft">
+            <img style="width:20px;margin-top: 8px" src=${contentList[i].portrait} />
+            </div>
+            <div class="col-3 commentList" >
             ${contentList[i].nickname}
             </div>
-            <div class="col-2 commentList" >
-            <img src=${contentList[i].portrait} />
-            </div>
-            <div class="col-16 commentList" style="text-align: left">
-            ${contentList[i].create_time}
+            <div class="col-15 commentList" style="text-align: left">
+            ${moment.unix(contentList[i].create_time).format('YYYY-MM-DD')}
             </div>
             <div class="col-4 commentList borderTopRight" >
               <i id="icon${i}" onclick="window.disableUserComment(${i})" class="anticon anticon-exclamation-circle-o commentListRight"></i>
@@ -316,7 +328,7 @@ class PublicComments extends React.Component{
   }
 
   componentDidMount() {
-    console.log(window.comments,window.record);
+    //console.log(window.contentList,111);
     let comments = window.comments;
     if(comments) {
         for(var i=0;i<comments.length;i++) {

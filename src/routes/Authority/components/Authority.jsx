@@ -45,30 +45,33 @@ class Authority extends React.Component{
       selectedRowKeys: [],
       selectedRows: [],
       record :{},
-      spin:true
+      spin:true,
+      search:'title'
     };
     this.handleConfirm = this.handleConfirm.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.fetch = this.fetch.bind(this);
     this.handleClickMul = this.handleClickMul.bind(this);
     this.getAdmins = this.getAdmins.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.changeSearch = this.changeSearch.bind(this);
   }
 
   columns() {
     return(
       [{
         title: 'ID',
+        width:'15%',
         dataIndex: 'id',
         sorter: (a, b) => a.id - b.id,
         render: text => <p>{text}</p>
       }, {
-        title: '头像',
-        dataIndex: 'img'
-      }, {
         title: '登录名',
+        width:'15%',
         dataIndex: 'username'
       }, {
         title: '添加时间',
+        width:'15%',
         dataIndex: 'reg_time',
         sorter: (a, b) => a.reg_time - b.reg_time,
         render:(text,record) =>
@@ -142,16 +145,55 @@ class Authority extends React.Component{
     $('#admin').html('添加管理员')
   }
 
+  changeSearch(value) {
+    console.log(value);
+    this.setState({
+      search:value
+    })
+  }
+
+  handleSubmit(e) {
+    const { search } = this.state;
+    e.preventDefault();
+    this.props.form.validateFields((errors, values) => {
+      if (!!errors) {
+        console.log('Errors in form!!!');
+        return;
+      }
+      console.log(values.key);
+      if(search == 'title') {
+        publicParams.username = values.key;
+        publicParams.service = 'Admin.SearchAdminByUsername';
+      }else {
+        publicParams.admin_id = values.key;
+        publicParams.service = 'Admin.SearchAdminById';
+      }
+      reqwest({
+        url: publicUrl,
+        method: 'get',
+        data: publicParams,
+        type: 'jsonp',
+        withCredentials: true,
+        success: (result) => {
+          this.setState({
+            data:result.data.admins,
+            total:result.data.total
+          });
+          console.log(result.data,this.state.data);
+        }
+      });
+    });
+  }
+
   onSelect(record, selected, selectedRows) {
     this.setState({
       selectedRows,
       record
     });
-    console.log(selectedRows);
   }
 
-  onSelectChange(selectedRowKeys) {
-    //console.log('selectedRowKeys changed: ', selectedRowKeys);
+  onSelectChange(selectedRowKeys,selectedRows) {
+    console.log(selectedRows);
     this.setState({ selectedRowKeys });
   }
 
@@ -159,17 +201,6 @@ class Authority extends React.Component{
     this.setState({
       selectedRows
     });
-    //console.log(selected, selectedRows, changeRows);
-  }
-
-  //从数组中删除指定值元素
-  removeByValue(arr,val) {
-    for(let i=0; i<arr.length; i++) {
-      if(arr[i] == val) {
-        arr.splice(i, 1);
-        break;
-      }
-    }
   }
 
   handleClickMul() {
@@ -189,18 +220,8 @@ class Authority extends React.Component{
         success: (result) => {
           const code = result.data.code;
           if(code == 0) {
-            //前端界面删除多选
-            for(let i=0; i<this.state.selectedRows.length; i++) {
-              this.removeByValue(this.state.data,this.state.selectedRows[i]);
-            }
-            setTimeout(() => {
-              this.setState({
-                data:this.state.data,
-                selectedRowKeys: [],
-                selectedRows:[]
-              });
-              message.info('删除成功');
-            }, 500);
+            this.getAdmins();
+            message.info('删除成功');
           }else if(code == 1) {
             message.error('删除失败');
           }else if(code == 9) {
@@ -342,18 +363,16 @@ class Authority extends React.Component{
               {/*Group*/}
               <Form onSubmit={this.handleSubmit} form={this.props.form}>
                 <Col span="2" offset="11">
-                  <Select defaultValue="all" size="large">
-                    <Option value="all">全部</Option>
-                    <Option value="ID">ID</Option>
-                    <Option value="nickName">昵称</Option>
-                    <Option value="user">账号</Option>
+                  <Select onChange={this.changeSearch} defaultValue="title" size="large">
+                    <Option value="title">登陆名</Option>
+                    <Option value="id">ID</Option>
                   </Select>
                 </Col>
                 <Col span="3">
                   <Input {...getFieldProps('key')} style={{height:'40px'}} />
                 </Col>
                 <Col span="2">
-                  <Button htmlType="submit" type="ghost" style={{width:'100%',height:'40px'}}>提交</Button>
+                  <Button htmlType="submit" type="ghost" style={{width:'100%',height:'40px'}}>搜索</Button>
                 </Col>
               </Form>
             </Row>
@@ -394,7 +413,10 @@ class Authority extends React.Component{
         <article className="ant-video-content ">
           {/*主体内容*/}
           <section className="article-right-content article-right-content-t-single">
-            <Table rowSelection={rowSelection} columns={this.columns()} dataSource={this.state.data} />
+            <Table rowKey={record => record.id}
+                   rowSelection={rowSelection}
+                   columns={this.columns()}
+                   dataSource={this.state.data} />
           </section>
         </article>
         <footer className="ant-video-footer" />

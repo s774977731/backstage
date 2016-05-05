@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom'
 import { Link } from 'react-router';
 import reqwest from 'reqwest';
+const moment = require('moment');
+moment.locale('zh-cn');
 
 import {
   Row,
@@ -19,8 +21,10 @@ import {
   QueueAnim,
   Popconfirm,
   Tag,
-  Select
+  Select,
+  Upload
 } from 'antd';
+const Option = Select.Option;
 //全局链接
 let publicParamsJSON = sessionStorage.publicParams;
 let publicParams = JSON.parse(publicParamsJSON);
@@ -40,8 +44,8 @@ class NewLiveRoom extends React.Component{
     super();
     this.state = {
       data : [],
-      selectedRowKeys:[],
-      selectedRows: window.room ? window.room.hosts : [],
+      selectedRowKeys:window.video ? getStats(window.video.views,'user_name') : [],
+      selectedRows: window.video ? window.video.views : [],
       record :{},
       loading: false,
       visible: false,
@@ -49,6 +53,12 @@ class NewLiveRoom extends React.Component{
       nickName:'',
       userId:'',
       titles:[],
+      fileList: [{
+        uid: -1,
+        name: 'xxx.png',
+        status: 'done',
+        url: window.video ? window.video.cover : 'https://os.alipayobjects.com/rmsportal/NDbkJhpzmLxtPhB.png',
+      }]
     };
     this.handleClickDelete = this.handleClickDelete.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -56,8 +66,8 @@ class NewLiveRoom extends React.Component{
     this.handleClick = this.handleClick.bind(this);
     this.fetch = this.fetch.bind(this);
     this.getTableRight = this.getTableRight.bind(this);
-    this.handlePicUpload = this.handlePicUpload.bind(this);
-    this.handleCreateUpdateRoom = this.handleCreateUpdateRoom.bind(this);
+    this.handleCreateUpdateVideo = this.handleCreateUpdateVideo.bind(this);
+    this.handleImgChange = this.handleImgChange.bind(this);
   }
 
   columnsLeft() {
@@ -65,7 +75,7 @@ class NewLiveRoom extends React.Component{
       {
         title: '头像',
         dataIndex: 'portrait',
-        render:(text) => <img src={text} width="50" />
+        render:(text) => <img src={text} width="30" />
       }, {
         title: '昵称',
         dataIndex: 'nick_name'
@@ -75,7 +85,7 @@ class NewLiveRoom extends React.Component{
       },{
         className:'text-right',
         render:(text,record) => <div>
-          <Select defaultValue={window.room ? record.title : ''} onChange={this.handletitlesChange.bind(this,record)} style={{ width: 90,textAlign:'center' }} >
+          <Select defaultValue={window.video ? record.view_code : ''} onChange={this.handletitlesChange.bind(this,record)} style={{ width: 90,textAlign:'center' }} >
             <Option value="1">视角一</Option>
             <Option value="2">视角二</Option>
             <Option value="3">视角三</Option>
@@ -91,7 +101,7 @@ class NewLiveRoom extends React.Component{
       {
         title: '头像',
         dataIndex: 'portrait',
-        render:(text) => <img src={text} width="50" />
+        render:(text) => <img src={text} width="30" />
       }, {
         title: '昵称',
         dataIndex: 'nick_name'
@@ -100,7 +110,8 @@ class NewLiveRoom extends React.Component{
         dataIndex: 'user_name',
       },{
         title: '添加时间',
-        dataIndex: 'reg_time'
+        dataIndex: 'reg_time',
+        render:(text) => moment.unix(text).format('YYYY-MM-DD')
       }, {
         className:'text-right',
         render:(text,record) => <Popconfirm
@@ -117,70 +128,143 @@ class NewLiveRoom extends React.Component{
    * 左半部分
    */
 
-  handlePicUpload() {
-    let params = {
-      uid:1
-    };
-    publicParams.service = 'Basic.UploadPicture',
-      extend(publicParams,params);
+  handleImgChange(info) {
+    let fileList = info.fileList;
+    fileList = fileList.slice(-1);
+    this.setState({ fileList });
 
-    let file = $('#uploadLogo')[0];
-    if(!file.files || !file.files[0]){
-      return;
+    if (info.file.status !== 'uploading') {
+      console.log(info.file, info.fileList);
     }
-    let reader = new FileReader();
-    reader.onload = function(evt){
-      document.getElementById('img').src = evt.target.result;
-      //base64图片
-      var index = (evt.target.result).indexOf('base64')+7;
-      publicParams.data_uri_scheme = (evt.target.result).substring(index);
-      console.log(publicParams);
+    if (info.file.status === 'done') {
+      console.log(info.file.response.data.img_url);
+      message.success(`${info.file.name} 上传成功。`);
+      this.setState({
+        img_url:info.file.response.data.img_url
+      })
+    } else if (info.file.status === 'error') {
+      message.error(`${info.file.name} 上传失败。`);
+    }
+  }
+
+
+  renderPicture() {
+    publicParams.service = 'Admin.UploadImage';
+    const props = {
+      name:'image',
+      action: publicUrl+'/?service=Admin.UploadImage',
+      data:publicParams,
+      accept: 'image/*',
+      listType: 'picture-card',
+      beforeUpload(file) {
+        const isPic = file.type === 'image/jpeg' || file.type === 'image/png';
+        const limitedSize = file.size < 2097152;
+        if (!isPic) {
+          message.error('非法的图片格式，请重新选择');
+        }
+        if (!limitedSize) {
+          message.error('图片体积过大，请重新选择');
+        }
+        return isPic && limitedSize;
+      },
+      onChange:this.handleImgChange,
     };
-    reader.onloadend = function () {
-      $.ajax({
-        method: "POST",
-        url:publicUrl,
-        data:publicParams,
-        dataType:'jsonp'
-      }).done(function(data) {
-        console.log(data);
-      }).error(function (data) {
-        console.log(data);
-      });
-    };
-    reader.readAsDataURL(file.files[0]);
+    return (
+      <div className="clearfix" style={{marginTop:'20px'}}>
+        <Upload {...props} fileList={this.state.fileList}>
+          <Icon type="plus" />
+          <div className="ant-upload-text">上传封面图</div>
+        </Upload>
+      </div>
+    )
   }
 
   handletitlesChange(recode,value) {
+    this.change = true;
     recode.title = value;
-    console.log(recode);
+    console.log(value);
   }
 
-  handleCreateUpdateRoom() {
+  //判断是否更新图片
+  isUpdataImg() {
+    const { fileList, img_url } = this.state;
+    if(fileList.url) {
+      return fileList.url
+    }else if(!fileList.url && img_url) {
+      return img_url
+    }else {
+      return window.video.cover
+    }
+  }
+
+  handleCreateUpdateVideo() {
     const { selectedRows } = this.state;
     let roomName = ReactDOM.findDOMNode(this.refs.roomName).childNodes[0].value;
+    if(!selectedRows) {
+      message.info('请选择直播人');
+      return;
+    }
+    if(!this.change) {
+      message.info('请选择视角');
+      return false;
+    }
     if(roomName.length == 0) {
       message.error('请输入频道名称');
       ReactDOM.findDOMNode(this.refs.roomName).childNodes[0].focus();
       return false;
     }
+    if(selectedRows.length < 1) {
+      message.info('请添加直播人');
+      return false;
+    }
     let uids = getStats(selectedRows,'uid');
-    let codes = getStats(selectedRows,'title');
-    let params = {
-      name:roomName,
-      cover:'',
-      uids:uids,
-      codes:codes
-    };
-    extend(publicParams,params);
-    if(!window.room.id) {
+    let titles = getStats(selectedRows,'title');
+    //判断是否有重复元素
+    let sortArray = titles.sort();
+      for(let i=0;i<sortArray.length;i++) {
+        if(sortArray[i] == sortArray[i+1] && sortArray.length > 1) {
+          message.info('不能选择两个相同的视角');
+          return false;
+        }
+      }
+
+    publicParams.name = roomName;
+    publicParams.cover = this.isUpdataImg();;
+    publicParams.codes = titles;
+    publicParams.uids = uids;
+    if(!window.video) {
       publicParams.service = 'Admin.CreateVideo';
-      console.log(window.room,11111);
     }else {
       publicParams.service = 'Admin.UpdateVideo';
-      publicParams.room_id = 16;
-      console.log(window.room,22222);
+      publicParams.video_id = window.video.id;
+
+      this.setState({
+        selectedRows
+      });
+
+      if(selectedRows[0].user_id) {
+        let userIds = getStats(selectedRows,'user_id');
+        publicParams.uids = userIds;
+        publicParams.titles = titles;
+      }else {
+        //添加或删除直播人
+        const views = window.video.views;
+        for(let i=0;i<selectedRows.length;i++) {
+          for(let j=0;j<views.length;j++) {
+            if(selectedRows[i].uid == views[j].user_id) {
+              if(selectedRows[i].change) {
+                selectedRows[i].title = selectedRows[i].title;
+              }else {
+                selectedRows[i].title = views[j].title;
+              }
+            }
+          }
+        }
+        publicParams.uids = getStats(selectedRows,'uid');
+        publicParams.titles = getStats(selectedRows,'title');
+      }
     }
+
     reqwest({
       url: publicUrl,
       method: 'get',
@@ -189,24 +273,27 @@ class NewLiveRoom extends React.Component{
       withCredentials: true,
       success: (result) => {
         console.log(result);
-        if(!window.room.id) {
+        if(!window.video.id) {
           if(result.data.code == 0) {
             message.success('房间创建成功');
             setTimeout(function () {
-              window.location.href = '/#/live-room'
+              window.location.href = '#/live-video'
             },1000)
           }else if(result.data.code == 1) {
             message.error('房间创建失败')
           }else if(result.data.code == 2) {
             message.info('房间创建成功，但添加主持人失败')
+          }else if(result.data.code == 3){
+            message.error('会话容量不足，请停止其他视频')
           }else {
-            message.error('非法请求')
+            message.error('非法请求');
           }
         }else {
           if(result.data.code == 0) {
             message.success('房间更新成功');
+            console.log(publicParams);
             setTimeout(function () {
-              window.location.href = '/#/live-room'
+              window.location.href = '#/live-video'
             },1000)
           }else if(result.data.code == 1) {
             message.error('房间更新失败')
@@ -232,12 +319,26 @@ class NewLiveRoom extends React.Component{
     });
   }
 
-  renderRoomName() {
-    if(window.room) {
-      return window.room.name;
+  renderVideoName() {
+    if(window.video) {
+      return window.video.name;
     }else {
       return "";
     }
+  }
+
+  returnDataSource() {
+    const { selectedRowKeys, data } = this.state;
+    var dataArr = [];
+    console.log(selectedRowKeys, data);
+    for(let i=0;i<data.length;i++) {
+      for(let j=0;j<selectedRowKeys.length;j++) {
+        if(data[i].user_name == selectedRowKeys[j]) {
+          dataArr.push(data[i]);
+        }
+      }
+    }
+    return dataArr;
   }
 
   /**
@@ -284,7 +385,7 @@ class NewLiveRoom extends React.Component{
       <QueueAnim>
         { visible ?
           <div key="a" className="addUserDiv">
-            <div className="col-4"><img src={portrait} /></div>
+            <div className="col-4"><img src={portrait} width="30" style={{marginTop:10}}/></div>
             <div className="col-4">{nickName}</div>
             <Button onClick={this.handleClick} className="col-offset-10"><Icon type="plus"/>添加</Button>
           </div> : null }
@@ -438,7 +539,9 @@ class NewLiveRoom extends React.Component{
   }
 
   onSelect(record, selected, selectedRows) {
-
+    if(selectedRows.length > 4) {
+      return false;
+    }
     this.setState({
       selectedRows,
       record,
@@ -447,26 +550,21 @@ class NewLiveRoom extends React.Component{
     console.log(selectedRows);
   }
 
-  onSelectAll(selected, selectedRows, changeRows) {
-    this.setState({
-      selectedRows,
-    });
-    console.log(selectedRows);
+  onSelectAll() {
+    return false;
   }
 
   onSelectChange(selectedRowKeys) {
-    console.log('selectedRowKeys changed: ', selectedRowKeys);
-    this.setState({ selectedRowKeys });
-    sessionStorage.selectedRowKeys = JSON.stringify(selectedRowKeys);
-
-  }
-
-  getCheckboxProps(record) {
-    return {
-      //defaultChecked: record.nick_name == 'hello', // 配置默认勾选的列
-      disabled: record.nick_name == 'hello'    // 配置无法勾选的列
+    if(selectedRowKeys.length > 4) {
+      message.info('最多选4个');
+      return false;
+    } else {
+      console.log('selectedRowKeys changed: ', selectedRowKeys);
+      this.setState({ selectedRowKeys });
+      sessionStorage.selectedRowKeys = JSON.stringify(selectedRowKeys);
     }
   }
+
 
   /**
    * 界面初始化
@@ -482,7 +580,7 @@ class NewLiveRoom extends React.Component{
     this.getTableRight();
   }
   componentDidMount() {
-    console.log(window.roomId,window.room.hosts)
+    console.log(window.video)
   }
 
   render() {
@@ -490,7 +588,7 @@ class NewLiveRoom extends React.Component{
     let keys;
 
     const rowSelection = {
-      getCheckboxProps:this.getCheckboxProps.bind(this),
+      selectedRowKeys:selectedRowKeys,
       onChange: this.onSelectChange.bind(this),
       onSelect: this.onSelect.bind(this),
       onSelectAll:this.onSelectAll.bind(this)
@@ -500,27 +598,23 @@ class NewLiveRoom extends React.Component{
       <div>
         <div className="new-live-video-left col-12">
           <header className="col-23">
-            <Input ref="roomName" defaultValue={this.renderRoomName()} placeholder="输入或更改频道名称" />
-            <div style={{margin:'10px 0 0 0'}}>
-              <img id="img" width="100" height="100" src="http://static.v1.5.webei.cn/business/images/forum_logo.png" alt="" />
-              <label htmlFor="uploadLogo" style={{marginLeft:'1rem',color:'#2db7f5',fontSize:'1.5rem',cursor:'pointer'}} id="uploadLogoAction" href="javascript:void(0)">修改</label>
-              <input style={{display:'none'}} id="uploadLogo" onChange={this.handlePicUpload} name="logo" type="file" single />
-            </div>
+            <Input ref="roomName" defaultValue={this.renderVideoName()} placeholder="输入或更改频道名称" />
+            {this.renderPicture()}
           </header>
           <article className="col-23 new-live-video-left-article">
             <div style={{fontSize:'1.5rem',marginBottom:'5px'}}>该频道的直播人</div>
             <Table
-              pagination={{pageSize:'4'}}
+              pagination={{pageSize:4}}
               columns={this.columnsLeft()}
-              dataSource={this.state.selectedRows} />
+              dataSource={this.returnDataSource()} />
           </article>
-          <footer className="col-23">
+          <footer className="col-23" style={{marginTop:'2rem'}}>
             <p>评论权限</p>
             <Row>
               <div className="col-5 new-video-left-footer-div1">开放评论</div>
               <div className="col-5 new-video-left-footer-div2">审核评论</div>
             </Row>
-            <div onClick={this.handleCreateUpdateRoom} className="col-24 new-video-left-footer-div-b"><Icon type="check"/></div>
+            <div onClick={this.handleCreateUpdateVideo} className="col-24 new-video-left-footer-div-b"><Icon type="check"/></div>
           </footer>
         </div>
         <div className="new-live-video-right col-12">
@@ -532,9 +626,13 @@ class NewLiveRoom extends React.Component{
               {this.renderAddUsers()}
               <div style={{height:'40px',margin:'10px 2px 2px 0'}}>
                 <span style={{lineHeight:'40px',fontSize:'1.5rem'}}>请勾选到该频道的直播人</span>
-                <span style={{lineHeight:'40px',marginLeft:'20px'}}>{hasSelected ? `已选择了 ${selectedRowKeys.length} 个，最多选择了4个对象` : ''}</span>
+                <span style={{lineHeight:'40px',marginLeft:'20px'}}>{hasSelected ? `已选择了 ${selectedRowKeys.length} 个直播人` : ''}</span>
               </div>
-              <Table rowSelection={rowSelection} columns={this.columns()} dataSource={this.state.data} pagination={{ pageSize: 8}} />
+              <Table rowKey={record => record.user_name}
+                     rowSelection={rowSelection}
+                     columns={this.columns()}
+                     dataSource={this.state.data}
+                     pagination={{ pageSize: 8}} />
             </div>
           </section>
         </div>

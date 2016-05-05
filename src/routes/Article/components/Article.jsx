@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router';
 import remove from 'lodash/remove';
 import reqwest from 'reqwest';
+const moment = require('moment');
+moment.locale('zh-cn');
 
 import {
   Row,
@@ -41,7 +43,8 @@ class Article extends React.Component {
       spin: true,
       operate: false,
       total:1,
-      recommend:false
+      recommend:false,
+      search:'title'
     };
     this.handleClick = this.handleClick.bind(this);
     this.onSelectChange = this.onSelectChange.bind(this);
@@ -52,6 +55,7 @@ class Article extends React.Component {
     this.getArticles = this.getArticles.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.getArticleNum = this.getArticleNum.bind(this);
+    this.changeSearch = this.changeSearch.bind(this);
   }
 
   columns() {
@@ -63,7 +67,7 @@ class Article extends React.Component {
         title: '头图',
         width:'10%',
         dataIndex: 'image_url',
-        render:(text) => <div><img src={text} style={{width:50}} /></div>
+        render:(text) => <div><img src={text} style={{width:30}} /></div>
       }, {
         title: '标题',
         width:'15%',
@@ -71,15 +75,20 @@ class Article extends React.Component {
       }, {
         title: '更新时间',
         width:'15%',
-        dataIndex: 'updateTime'
+        dataIndex: 'updated_at',
+        render:(text) => moment.unix(text).format('YYYY-MM-DD')
       }, {
         title: '浏览点赞',
         width:'15%',
-        dataIndex: 'like'
+        render:(text,record) =><p href="javascript:;">
+          {record.view_num}浏览|{record.like_num}点赞
+        </p>
       }, {
         title: '分享收藏',
         width:'15%',
-        dataIndex: 'collection'
+        render:(text,record) =><p>
+          {record.share_num}分享|{record.collect_num}收藏
+        </p>
       },{
         key: 'operation',
         className:'text-right',
@@ -88,7 +97,7 @@ class Article extends React.Component {
               <a onClick={this.enterDetailArticle.bind(this,record.article_id,record)}>
                 <Icon type="link"/>
                 <span className="ant-divider" />
-                <Icon type="message"/>11145
+                <Icon type="message"/>{record.comment_num}
               </a>
               <span className="ant-divider" />
               <Popconfirm
@@ -98,7 +107,7 @@ class Article extends React.Component {
                 <a href="javascript:;">删除</a>
               </Popconfirm>
               <span className="ant-divider" />
-              <a onClick={this.recommend.bind(this,record,record.article_id)}>{record.recommended == 1 ? '取消推荐' : '推荐'}</a>
+              <a onClick={this.recommend.bind(this,record,record.article_id)}>{record.recommended == 1 ? '取消' : '推荐'}</a>
             </span>
         }])
   }
@@ -165,16 +174,6 @@ class Article extends React.Component {
     }
   }
 
-  //从数组中删除指定值元素
-  removeByValue(arr, val) {
-    for (let i = 0; i < arr.length; i++) {
-      if (arr[i] == val) {
-        arr.splice(i, 1);
-        break;
-      }
-    }
-  }
-
   //删除多选
   handleClickDelete() {
     const {data, selectedRows} = this.state;
@@ -192,18 +191,12 @@ class Article extends React.Component {
         success: (result) => {
           const code = result.data.code;
           if(code == 0) {
-            //前端界面删除多选
-            for(let i=0; i<this.state.selectedRows.length; i++) {
-              this.removeByValue(this.state.data,this.state.selectedRows[i]);
-            }
-            setTimeout(() => {
-              this.setState({
-                data:this.state.data,
-                selectedRowKeys: [],
-                selectedRows:[]
-              });
-              message.info('删除成功');
-            }, 500);
+            this.getArticles();
+            this.setState({
+              selectedRowKeys: [],
+              selectedRows:[]
+            });
+            message.info('删除成功');
 
           }else if(code == 1) {
 
@@ -282,16 +275,49 @@ class Article extends React.Component {
     });
   }
 
+  changeSearch(value) {
+    console.log(value);
+    this.setState({
+      search:value
+    })
+  }
+
   handleSubmit(e) {
+    const { search } = this.state;
     e.preventDefault();
     this.props.form.validateFields((errors, values) => {
       if (!!errors) {
         console.log('Errors in form!!!');
         return;
       }
-      console.log(values);
-      this.fetch(values);
+      console.log(values.key);
+      if(search == 'title') {
+        publicParams.article_title = values.key;
+        publicParams.service = 'Admin.SearchArticleByTitle';
+      }else {
+        publicParams.article_id = values.key;
+        publicParams.service = 'Admin.SearchArticleById';
+      }
+      reqwest({
+        url: publicUrl,
+        method: 'get',
+        data: publicParams,
+        type: 'jsonp',
+        withCredentials: true,
+        success: (result) => {
+            this.setState({
+              data:result.data.articles,
+              total:result.data.total
+            });
+          console.log(result.data);
+        }
+      });
     });
+  }
+
+  enterAddArticle() {
+    window.article = false;
+    window.location.href = '#/new-article'
   }
 
   fetch() {
@@ -318,12 +344,12 @@ class Article extends React.Component {
         //获取文章内容
         if(result.data.article) {
           window.article = result.data.article;
-          window.location.href = '/#/detail-article';
+          window.location.href = '#/detail-article';
         }
         //获取评论列表
         if(result.data.comments) {
           window.comments = result.data.comments;
-          window.location.href = '/#/detail-article';
+          window.location.href = '#/detail-article';
         }
       },
       error: (err) => {
@@ -399,25 +425,21 @@ class Article extends React.Component {
               </span>
             </Col>
             <Col span="2" offset="7">
-              <Link to="/new-article">
-                <Button  className="fish-btn-black" style={{width:'100%',height:'40px'}}><Icon style={{marginLeft:'-5px'}} type="plus"/>添加文章</Button>
-              </Link>
+                <Button onClick={this.enterAddArticle} className="fish-btn-black" style={{width:'100%',height:'40px'}}><Icon style={{marginLeft:'-5px'}} type="plus"/>添加文章</Button>
             </Col>
             {/*Group*/}
             <Form onSubmit={this.handleSubmit} form={this.props.form}>
               <Col span="2" offset="1">
-                  <Select defaultValue="all" size="large">
-                    <Option value="all">全部</Option>
-                    <Option value="ID">ID</Option>
-                    <Option value="nickName">昵称</Option>
-                    <Option value="user">账号</Option>
+                  <Select onChange={this.changeSearch} defaultValue="title" size="large">
+                    <Option value="title">标题</Option>
+                    <Option value="id">ID</Option>
                   </Select>
               </Col>
               <Col span="3">
                 <Input {...getFieldProps('key')} style={{height:'40px'}} />
               </Col>
               <Col span="2">
-                  <Button htmlType="submit" type="ghost" style={{width:'100%',height:'40px'}}>提交</Button>
+                  <Button htmlType="submit" type="ghost" style={{width:'100%',height:'40px'}}>搜索</Button>
               </Col>
             </Form>
           </Row>
@@ -444,6 +466,7 @@ class Article extends React.Component {
         </header>
         <section className="article-right-content article-right-content-single-table">
           <Table
+            rowKey = {record => record.article_id}
             rowSelection={rowSelection}
             pagination = {{
                    defaultCurrent:1,
