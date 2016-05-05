@@ -127,15 +127,22 @@ class NewArticle extends React.Component{
     console.log('收到表单值：', this.props.form.getFieldsValue());
     let formValue = this.props.form.getFieldsValue();
 
-    let params =   {
-      type:value,
-      content:content,
-      title:formValue.title,
-      image_url:this.returnImg_url() || "",
-      url:formValue.link  || '',
-      recommended:Number(formValue.recommended) || 0,
-      banner:Number(formValue.banner) || 0
-    };
+    //let params =   {
+    //  type:value,
+    //  content:content,
+    //  title:formValue.title,
+    //  image_url:this.returnImg_url() || "",
+    //  url:formValue.link  || '',
+    //  recommended:Number(formValue.recommended) || 0,
+    //  banner:Number(formValue.banner) || 0
+    //};
+    publicParams.type = value;
+    publicParams.content = content;
+    publicParams.title = formValue.title;
+    publicParams.image_url = this.returnImg_url() || "";
+    publicParams.url = formValue.link  || '';
+    publicParams.recommended = Number(formValue.recommended) || 0;
+    publicParams.banner = Number(formValue.banner) || 0;
     publicParams.service = 'Admin.AddArticle';
     //if(window.article) {
     //  publicParams.article_id = window.article.article_id;
@@ -143,7 +150,7 @@ class NewArticle extends React.Component{
     //}else {
     //  publicParams.service = 'Admin.AddArticle';
     //}
-    extend(publicParams,params);
+    //extend(publicParams,params);
     console.log(publicParams);
     this.fetch();
   }
