@@ -41,12 +41,10 @@ class Article extends React.Component {
       selectedRows: [],
       record: {},
       spin: true,
-      operate: false,
       total:1,
       recommend:false,
       search:'title'
     };
-    this.handleClick = this.handleClick.bind(this);
     this.onSelectChange = this.onSelectChange.bind(this);
     this.handleClickDelete = this.handleClickDelete.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -130,7 +128,12 @@ class Article extends React.Component {
         this.getArticles();
         setTimeout(function () {
           if(record.recommended == 0) {
-            message.success('推荐成功')
+            if(result.data.code == 0) {
+              message.success('推荐成功')
+            }
+            if(result.data.code == 2) {
+              message.info('最多推荐4个，请先取消其他推荐')
+            }
           }else{
             message.success('取消推荐成功')
           }
@@ -155,23 +158,6 @@ class Article extends React.Component {
   onSelectChange(selectedRowKeys) {
     console.log('selectedRowKeys changed: ', selectedRowKeys);
     this.setState({selectedRowKeys});
-  }
-
-  handleClick() {
-    const operateDelete = document.getElementsByClassName("fish-btn-black")[0];
-
-    if (this.state.operate == false) {
-      operateDelete.innerHTML = '<i class=" anticon anticon-cross"></i><span>&nbsp;&nbsp;</span><span>取消</span>';
-      this.setState({
-        operate: !this.state.operate,
-        selectedRowKeys: []
-      });
-    } else {
-      operateDelete.innerHTML = '<i class=" anticon anticon-setting"></i><span>操作</span>';
-      this.setState({
-        operate: !this.state.operate
-      });
-    }
   }
 
   //删除多选
@@ -219,7 +205,6 @@ class Article extends React.Component {
           }
         }
       });
-
     } else {
       message.info("请至少选择一项")
     }
@@ -242,7 +227,7 @@ class Article extends React.Component {
 
   //前后端请求删除
   deleteClick(article_id) {
-    const {data} = this.state;
+    const { data } = this.state;
     publicParams.article_id = article_id;
     publicParams.service = 'Admin.DeleteArticle';
 
@@ -317,7 +302,7 @@ class Article extends React.Component {
 
   enterAddArticle() {
     window.article = false;
-    window.location.href = '#/new-article'
+    window.location.href = '#/article/new-article'
   }
 
   fetch() {
@@ -344,12 +329,12 @@ class Article extends React.Component {
         //获取文章内容
         if(result.data.article) {
           window.article = result.data.article;
-          window.location.href = '#/detail-article';
+          window.location.href = '#/article/detail-article';
         }
         //获取评论列表
         if(result.data.comments) {
           window.comments = result.data.comments;
-          window.location.href = '#/detail-article';
+          window.location.href = '#/article/detail-article';
         }
       },
       error: (err) => {
@@ -384,6 +369,7 @@ class Article extends React.Component {
   handleChange(current) {
     console.log(current);
     publicParams.page = current;
+    window.articlePage = current;
     this.getArticles()
   }
 
@@ -403,9 +389,9 @@ class Article extends React.Component {
   }
 
   render() {
-    const { selectedRowKeys, operate, spin } = this.state;
+    const { selectedRowKeys, spin } = this.state;
     const { getFieldProps } = this.props.form;
-    const rowSelection = (!this.state.operate) ? null : {
+    const rowSelection = {
       selectedRowKeys,
       onChange: this.onSelectChange,
       onSelect: this.onSelect.bind(this)
@@ -416,15 +402,15 @@ class Article extends React.Component {
         {/*头部*/}
         <header className="article-right-header">
           <Row>
-            <Col span="2">
-              <Button className="fish-btn-black" style={{width:'100%',height:'40px'}} onClick={this.handleClick}><Icon type="setting"/>操作</Button>
+            <Col span="1">
+              <div className="Icon-demo-div" onClick={this.handleClickDelete}><Icon className="Icon-demo" type="delete"/></div>
             </Col>
             <Col span="5" style={{whiteSpace:'nowarp',textAlign:'center'}}>
               <span style={{ marginLeft: 8 }}>
                 {hasSelected ? `选择了 ${selectedRowKeys.length} 个对象` : ''}
               </span>
             </Col>
-            <Col span="2" offset="7">
+            <Col span="2" offset="8">
                 <Button onClick={this.enterAddArticle} className="fish-btn-black" style={{width:'100%',height:'40px'}}><Icon style={{marginLeft:'-5px'}} type="plus"/>添加文章</Button>
             </Col>
             {/*Group*/}
@@ -443,35 +429,16 @@ class Article extends React.Component {
               </Col>
             </Form>
           </Row>
-          <Row>
-            <Col span="2">
-              <div
-                onClick={this.handleClickDelete}
-                className="operate-button-delete"
-                style={operate?{visibility:'visible'}:{visibility:'hidden'}}>
-                删除
-              </div>
-            </Col>
-          </Row>
-          <Row>
-            <Col span="2">
-              <div
-                className="operate-button-delete"
-                onClick={this.recommend}
-                style={operate?{visibility:'visible'}:{visibility:'hidden'}}>
-                推荐
-              </div>
-            </Col>
-          </Row>
         </header>
-        <section className="article-right-content article-right-content-single-table">
+        <section className="article-right-content" style={{marginTop:'25px'}}>
           <Table
             rowKey = {record => record.article_id}
             rowSelection={rowSelection}
             pagination = {{
-                   defaultCurrent:1,
+                   current:window.articlePage ? window.articlePage : 1,
                    onChange:this.handleChange,
-                   total:this.state.total}}
+                   total:this.state.total
+                   }}
             columns={this.columns()}
             dataSource={this.state.data} />
           <br/>

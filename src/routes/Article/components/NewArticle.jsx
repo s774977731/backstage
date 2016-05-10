@@ -65,10 +65,10 @@ class NewArticle extends React.Component{
 
   fetch() {
     reqwest({
-      url: publicUrl,
+      url: publicUrl+'/?service=Admin.AddArticle',
       method: 'post',
       data: publicParams,
-      type: 'jsonp',
+      //type: 'json',
       withCredentials: true,
       success: (result) => {
         console.log(result);
@@ -90,12 +90,12 @@ class NewArticle extends React.Component{
         //}
         if(result.data.code == 0) {
           message.success('添加文章成功');
+          setTimeout(function(){
+            window.location.href = '#/article/main'
+          },500);
         }else {
-          message.success('添加文章失败')
+          message.error('添加文章失败')
         }
-        setTimeout(function(){
-          window.location.href = '#/article'
-        },500);
       },
       error: (err) => {
         console.log(err);
@@ -142,7 +142,6 @@ class NewArticle extends React.Component{
     publicParams.image_url = this.returnImg_url() || "";
     publicParams.url = formValue.link  || '';
     publicParams.recommended = Number(formValue.recommended) || 0;
-    publicParams.banner = Number(formValue.banner) || 0;
     publicParams.service = 'Admin.AddArticle';
     //if(window.article) {
     //  publicParams.article_id = window.article.article_id;
@@ -168,7 +167,7 @@ class NewArticle extends React.Component{
       message.success(`${info.file.name} 上传成功。`);
       this.setState({
         img_url:info.file.response.data.img_url
-      })
+      });
       console.log('跟换后的图片地址'+this.state.img_url);
     } else if (info.file.status === 'error') {
       message.error(`${info.file.name} 上传失败。`);
@@ -267,7 +266,7 @@ class NewArticle extends React.Component{
     return(
       <Form onSubmit={this.handleSubmit} form={this.props.form}>
         <FormItem>
-          <Input required {...getFieldProps('title')} style={{height:'40px'}}  placeholder="输入文章标题" maxLength="25"/>{/*defaultValue={this.renderArticleName()} onChange={this.hangleTitleChange}*/}
+          <Input required {...getFieldProps('title')} style={{height:'40px'}}  placeholder="输入文章标题" maxLength="50"/>{/*defaultValue={this.renderArticleName()} onChange={this.hangleTitleChange}*/}
         </FormItem>
           {this.renderPicture()}
         <FormItem style={{height:'300px'}}>
@@ -287,9 +286,6 @@ class NewArticle extends React.Component{
           <label className="ant-checkbox-inline">
             <Checkbox  {...getFieldProps('recommended')} />推荐
           </label>
-          <label className="ant-checkbox-inline">
-            <Checkbox  {...getFieldProps('banner')} />置顶轮播
-          </label>
         </FormItem>
         <FormItem>
           <div className="new-article-footer-1">
@@ -298,7 +294,7 @@ class NewArticle extends React.Component{
             </Button>
           </div>
           <div className="new-article-footer-2">
-            <Link to="/article">
+            <Link to="/article/main">
               <Button type="ghost" style={{width:'100%',height:'100%'}}>
                 取消
               </Button>

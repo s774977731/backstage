@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Link } from 'react-router';
 import reqwest from 'reqwest';
 //import video from 'video';
 import PublicComments from '../../Public/PublicComments.jsx';
@@ -300,7 +299,7 @@ class VideoCheck extends React.Component{
         console.log(result);
         if(result.data.code == 0) {
           message.success('操作成功');
-          window.location.href = '#/live-video'
+          window.location.href = '#/video/main'
         }
       },
       error: (err) => {

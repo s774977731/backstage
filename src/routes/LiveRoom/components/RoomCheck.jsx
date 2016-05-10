@@ -240,7 +240,8 @@ class VideoCheck extends React.Component{
         success: (result) => {
           console.log(result.data);
           if(result.data.code == 0) {
-            message.success('操作成功')
+            message.success('操作成功');
+            window.location.href = '#/room/main';
           }else {
             message.success('操作失败')
           }
@@ -259,7 +260,6 @@ class VideoCheck extends React.Component{
         }
       })
     }
-
   }
 
   componentWillMount() {
@@ -271,11 +271,9 @@ class VideoCheck extends React.Component{
     return(
       <div>
         <header className="video-check-header" >
-          <Link to="/live-room">
-            <Button onClick={this.handleClick} size="large" type="ghost"><Icon type="cross-circle" />
-              {window.record.delete ? '删除直播' :'结束直播'}
-            </Button>
-          </Link>
+          <Button onClick={this.handleClick} size="large" type="ghost"><Icon type="cross-circle" />
+            {window.record.delete ? '删除直播' :'结束直播'}
+          </Button>
           <span>&nbsp;&nbsp;温州市2016年全民马拉松</span>
           <Button onClick={this.renderModal} style={{float:'right'}} size="large" type="ghost"><Icon type="user" />该频道直播人</Button>
         </header>

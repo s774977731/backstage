@@ -94,10 +94,10 @@ class Authority extends React.Component{
   handleConfirm() {
     var loginInput =  $('#loginInput').val();
     var passwordInput = $('#passwordInput').val();
-    var passwordInputAgain = $('#passwordInputAgain').val()
+    var passwordInputAgain = $('#passwordInputAgain').val();
 
     if(loginInput == ""||passwordInput ==""||passwordInputAgain ==""){
-      message.info('表单不能为空');
+      message.info('密码不能为空');
       document.getElementById('handle-add-admin').style.visibility = 'visible';
       document.getElementById('admin').innerHTML = '确认添加';
     }else if(passwordInput !== passwordInputAgain){
@@ -106,7 +106,6 @@ class Authority extends React.Component{
       document.getElementById('handle-add-admin').style.visibility = 'visible';
       document.getElementById('admin').innerHTML = '确认添加';
     }else {
-
       //后台请求添加管理员
       const params = {
         username:loginInput,

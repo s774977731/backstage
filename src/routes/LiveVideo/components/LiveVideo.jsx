@@ -60,14 +60,24 @@ class LiveVideo extends React.Component{
       title: '创建时间',
       width:'10%',
       dataIndex: 'create_time',
-      render:(text,record) =>
-        moment.unix(text).format('YYYY-MM-DD')
+      render:(text,record) => {
+        if(text) {
+          return moment.unix(text).format('YYYY-MM-DD')
+        }else {
+          return '-----'
+        }
+      }
     },{
       title: '开播时间',
       width:'10%',
       dataIndex: 'play_time',
-      render:(text,record) =>
-        moment.unix(text).format('YYYY-MM-DD')
+      render:(text) => {
+        if(text == 0) {
+          return '----------------'
+        }else {
+          return moment.unix(text).format('YYYY-MM-DD')
+        }
+      }
     },{
       title: '直播状态',
       width:'10%',
@@ -130,7 +140,12 @@ class LiveVideo extends React.Component{
         this.getVideos();
         setTimeout(function () {
           if(record.recommend == 0) {
-            message.success('推荐成功')
+            if(result.data.code == 0) {
+              message.success('推荐成功')
+            }
+            if(result.data.code == 2) {
+              message.info('最多推荐4个，请先取消其他推荐')
+            }
           }else {
             message.success('取消推荐成功')
           }
@@ -237,14 +252,14 @@ class LiveVideo extends React.Component{
         //Admin.GetVideo
         if(result.data.video) {
           window.video = result.data.video;
-          window.location.href = '#/new-live-video'
+          window.location.href = '#/video/new-live-video'
         }
         //获取视频直播内容
         if(result.data.content) {
           //console.log(result.data.content.views);
           window.videoCheck = result.data.content.views;
           setTimeout(function () {
-            window.location.href = '#/video-check'
+            window.location.href = '#/video/video-check'
           },100)
         }
         //获取评论列表
@@ -269,12 +284,13 @@ class LiveVideo extends React.Component{
 
   handleAddVideo() {
     window.video = false;
-    window.location.href = '#/new-live-video'
+    window.location.href = '#/video/new-live-video'
   }
 
   handleChange(current) {
     console.log(current);
     publicParams.page = current;
+    window.liveVideoPage = current;
     this.getVideos()
   }
 
@@ -331,10 +347,10 @@ class LiveVideo extends React.Component{
             <Table rowKey = {record => record.id}
                    rowSelection={null}
                    pagination = {{
-                   defaultCurrent:1,
+                   current:window.liveVideoPage ? window.liveVideoPage : 1,
                    onChange:this.handleChange,
                    total:this.state.total}}
-                   dataSource={data}
+                   dataSource={ data }
                    columns={this.columns()} />
             <br />
           </section>

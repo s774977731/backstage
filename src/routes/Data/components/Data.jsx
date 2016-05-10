@@ -86,16 +86,6 @@ class DataCenter extends React.Component{
     this.handleNewChange = this.handleNewChange.bind(this);
   }
 
-  handleMouseOver(e) {
-    let node = e.target.parentNode.parentNode.childNodes[1];
-    node.setAttribute("style","display:block;background-color: #e44747");
-  }
-
-  handleOnMouseOut(e) {
-    let node = e.target.parentNode.parentNode.childNodes[1];
-    node.setAttribute("style","display:none;background-color: rgb(52, 73, 94)");
-  }
-
   fetch() {
     reqwest({
       url: publicUrl,
@@ -295,19 +285,19 @@ class DataCenter extends React.Component{
         <header className="data-right-header">
           <Row type="flex" justify="space-between" align="middle">
             <Col span="8">
-              <div className="div" onMouseOver={this.handleMouseOver} onMouseOut={this.handleOnMouseOut}>
+              <div className="div">
                 <h1>{totalNew || 0}</h1>
                 <h3 style={{marginTop:'-8rem'}}>累计用户</h3>
               </div>
             </Col>
             <Col span="8">
-              <div className="div"  onMouseOver={this.handleMouseOver} onMouseOut={this.handleOnMouseOut}>
+              <div className="div">
                 <h1>{activeNum || 0}</h1>
                 <h3 style={{marginTop:'-8rem'}}>活跃用户</h3>
               </div>
             </Col>
             <Col span="8">
-              <div className="div"  onMouseOver={this.handleMouseOver} onMouseOut={this.handleOnMouseOut}>
+              <div className="div">
                 <h1>{newNum || 0}</h1>
                 <h3 style={{marginTop:'-8rem'}}>新增用户</h3>
               </div>

@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom'
-import { Link } from 'react-router';
 import reqwest from 'reqwest';
 const moment = require('moment');
 moment.locale('zh-cn');
@@ -22,9 +21,12 @@ import {
   Popconfirm,
   Tag,
   Select,
-  Upload
+  Upload,
+  Radio
 } from 'antd';
 const Option = Select.Option;
+const RadioGroup = Radio.Group;
+
 //全局链接
 let publicParamsJSON = sessionStorage.publicParams;
 let publicParams = JSON.parse(publicParamsJSON);
@@ -58,7 +60,8 @@ class NewLiveRoom extends React.Component{
         name: 'xxx.png',
         status: 'done',
         url: window.video ? window.video.cover : 'https://os.alipayobjects.com/rmsportal/NDbkJhpzmLxtPhB.png',
-      }]
+      }],
+      value:0
     };
     this.handleClickDelete = this.handleClickDelete.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -68,6 +71,7 @@ class NewLiveRoom extends React.Component{
     this.getTableRight = this.getTableRight.bind(this);
     this.handleCreateUpdateVideo = this.handleCreateUpdateVideo.bind(this);
     this.handleImgChange = this.handleImgChange.bind(this);
+    this.handleRadioChange = this.handleRadioChange.bind(this);
   }
 
   columnsLeft() {
@@ -111,7 +115,13 @@ class NewLiveRoom extends React.Component{
       },{
         title: '添加时间',
         dataIndex: 'reg_time',
-        render:(text) => moment.unix(text).format('YYYY-MM-DD')
+        render:(text) => {
+          if(text == 0) {
+            return '----------------'
+          }else {
+            return moment.unix(text).format('YYYY-MM-DD')
+          }
+        }
       }, {
         className:'text-right',
         render:(text,record) => <Popconfirm
@@ -147,6 +157,11 @@ class NewLiveRoom extends React.Component{
     }
   }
 
+  handleRadioChange(e) {
+    this.setState({
+      value: e.target.value,
+    });
+  }
 
   renderPicture() {
     publicParams.service = 'Admin.UploadImage';
@@ -185,20 +200,8 @@ class NewLiveRoom extends React.Component{
     console.log(value);
   }
 
-  //判断是否更新图片
-  isUpdataImg() {
-    const { fileList, img_url } = this.state;
-    if(fileList.url) {
-      return fileList.url
-    }else if(!fileList.url && img_url) {
-      return img_url
-    }else {
-      return window.video.cover
-    }
-  }
-
   handleCreateUpdateVideo() {
-    const { selectedRows } = this.state;
+    const { selectedRows, pic_is_change, img_url, fileList, value } = this.state;
     let roomName = ReactDOM.findDOMNode(this.refs.roomName).childNodes[0].value;
     if(!selectedRows) {
       message.info('请选择直播人');
@@ -229,9 +232,10 @@ class NewLiveRoom extends React.Component{
       }
 
     publicParams.name = roomName;
-    publicParams.cover = this.isUpdataImg();;
+    publicParams.cover = pic_is_change ? img_url : fileList.url ;
     publicParams.codes = titles;
     publicParams.uids = uids;
+    publicParams.audit = this.state.value;
     if(!window.video) {
       publicParams.service = 'Admin.CreateVideo';
     }else {
@@ -277,7 +281,7 @@ class NewLiveRoom extends React.Component{
           if(result.data.code == 0) {
             message.success('房间创建成功');
             setTimeout(function () {
-              window.location.href = '#/live-video'
+              window.location.href = '#/video/main'
             },1000)
           }else if(result.data.code == 1) {
             message.error('房间创建失败')
@@ -293,7 +297,7 @@ class NewLiveRoom extends React.Component{
             message.success('房间更新成功');
             console.log(publicParams);
             setTimeout(function () {
-              window.location.href = '#/live-video'
+              window.location.href = '#/video/main'
             },1000)
           }else if(result.data.code == 1) {
             message.error('房间更新失败')
@@ -360,9 +364,9 @@ class NewLiveRoom extends React.Component{
         if (result.data.code == 0) {
           console.log('success');
           this.getTableRight();
-          this.setState({
-            data: data
-          });
+          //this.setState({
+          //  data: data
+          //});
           message.success('您已删除该评论');
         }
       },
@@ -408,9 +412,6 @@ class NewLiveRoom extends React.Component{
         if(result.data.code == 0) {
           message.success('授予该用户直播权限成功');
           this.getTableRight();
-          this.setState({
-            data:data
-          })
         }else if(result.data.code ==1) {
           message.error('授予该用户直播权限失败');
         }else {
@@ -610,9 +611,12 @@ class NewLiveRoom extends React.Component{
           </article>
           <footer className="col-23" style={{marginTop:'2rem'}}>
             <p>评论权限</p>
+            <br />
             <Row>
-              <div className="col-5 new-video-left-footer-div1">开放评论</div>
-              <div className="col-5 new-video-left-footer-div2">审核评论</div>
+              <RadioGroup onChange={this.handleRadioChange} value={this.state.value}>
+                <Radio key="0" value={0}>开放评论</Radio>
+                <Radio key="1" value={1}>关闭评论</Radio>
+              </RadioGroup>
             </Row>
             <div onClick={this.handleCreateUpdateVideo} className="col-24 new-video-left-footer-div-b"><Icon type="check"/></div>
           </footer>

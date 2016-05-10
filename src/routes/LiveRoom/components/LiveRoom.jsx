@@ -61,14 +61,24 @@ class LiveRoom extends React.Component{
       title: '创建时间',
       width:'10%',
       dataIndex: 'create_time',
-      render:(text,record) =>
-        moment.unix(text).format('YYYY-MM-DD')
+      render:(text,record) => {
+        if(text == 0) {
+          return '----------------'
+        }else {
+          return moment.unix(text).format('YYYY-MM-DD')
+        }
+      }
     },{
       title: '开播时间',
       width:'10%',
       dataIndex: 'play_time',
-      render:(text,record) =>
-        moment.unix(text).format('YYYY-MM-DD')
+      render:(text,record) => {
+        if(text == 0) {
+          return '----------------'
+        }else {
+          return moment.unix(text).format('YYYY-MM-DD')
+        }
+      }
     },{
       title: '直播状态',
       width:'10%',
@@ -127,11 +137,16 @@ class LiveRoom extends React.Component{
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        console.log(result);
+        //console.log(result);
         this.getRooms();
         setTimeout(function () {
           if(record.recommend == 0) {
-            message.success('推荐成功')
+            if(result.data.code == 0) {
+              message.success('推荐成功')
+            }
+            if(result.data.code == 2) {
+              message.info('最多推荐4个，请先取消其他推荐')
+            }
           }else{
             message.success('取消推荐成功')
           }
@@ -236,17 +251,17 @@ class LiveRoom extends React.Component{
         }
         if(result.data.room) {
             window.room = result.data.room;
-            window.location.href = '#/new-live-room'
+            window.location.href = '#/room/new-live-room'
         }
         //获取直播间的直播内容
         if(result.data.content) {
           window.roomCheck = result.data.content;
-          window.location.href = '#/room-check'
+          window.location.href = '#/room/room-check'
         }
         //获取评论列表
         if(result.data.comments) {
           window.comments = result.data.comments;
-          window.location.href = '#/room-check'
+          window.location.href = '#/room/room-check'
         }
 
       },
@@ -267,12 +282,13 @@ class LiveRoom extends React.Component{
 
   handleAddRoom() {
     window.room = false;
-    window.location.href = '#/new-live-room'
+    window.location.href = '#/room/new-live-room'
   }
 
   handleChange(current) {
     console.log(current);
     publicParams.page = current;
+    window.liveRoomPage = current;
     this.getRooms()
   }
 
@@ -329,7 +345,7 @@ class LiveRoom extends React.Component{
             <Table rowKey = {record => record.id}
                    rowSelection={null}
                    pagination = {{
-                   defaultCurrent:1,
+                   current:window.liveRoomPage ? window.liveRoomPage : 1,
                    onChange:this.handleChange,
                    total:this.state.total}}
                    dataSource={data}

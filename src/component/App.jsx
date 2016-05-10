@@ -18,76 +18,67 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      current:'1',
+      //current:'1',
       data:'数据中心'
     };
     this.handleClick = this.handleClick.bind(this);
   }
 
   handleClick(e) {
-    this.setState({
-      current: e.key
-    });
-    //全局的key
-    window.key = e.key;
-    console.log(window.key);
-
-    switch (Number(e.key)) {
-      case 2:
-        this.setState({
-          data:'文章管理'
-        });
-        break;
-      case 3:
-        this.setState({
-          data:'视频直播'
-        });
-        break;
-      case 4:
-        this.setState({
-          data:'直播间'
-        });
-        break;
-      case 5:
-        this.setState({
-          data:'权限中心'
-        });
-        break;
-      default:
-        this.setState({
-          data:'数据中心'
-        });
+    switch (e.key) {
+      case 'data-center':
+        window.key = 1;
+            break;
+      case 'article':
+        window.key = 2;
+            break;
+      case 'video':
+        window.key = 3;
+            break;
+      case 'room':
+        window.key = 4;
+            break;
+      case 'authority-center':
+        window.key = 5;
+            break;
     }
+    //全局的key
+    console.log(window.key);
   }
 
   render() {
+    const { location, children } = this.props;
+    console.log(children.props);
     return (
       <article className="ant-layout-main">
         {/*这里左边*/}
         <aside className = 'ant-layout-left'>
-          <header className = "ant-layout-logo"><p style={{fontSize:'1.5rem'}}>直播温州</p></header>
+          <header className = "ant-layout-logo">
+            <img src="http://7xrdm6.com2.z0.glb.qiniucdn.com/1_image_a1_1462781794_5810image/png" height="25px"/>
+          </header>
           <Menu onClick = {this.handleClick}
                 theme="dark"
                 defaultOpenKeys = {['sub2','sub3']}
-                selectedKeys = {[this.state.current]}
+                defaultSelectedKeys={[children.props.route.path]}
+                selectedKeys={[children.props.route.path]}
                 mode = "inline">
-            <Menu.Item  key = "1" >
+            <Menu.Item  key = "data-center" >
               <Link to="/data-center"><Icon type = "bar-chart" />数据中心</Link>
             </Menu.Item>
             <SubMenu key = "sub2" title = {<span><Icon type = "home" /><span>首页管理</span></span>}>
-              <Menu.Item key = "2">
-              <Link to="/article">文章管理</Link>
+              <Menu.Item key = "article">
+              <Link to="/article/main">文章管理</Link>
               </Menu.Item>
             </SubMenu>
             <SubMenu key = "sub3" title = {<span><Icon type = "play-circle-o" /><span>直播管理</span></span>}>
-              <Menu.Item key = "3">
-                <Link to="/live-video">视频直播</Link>
+              <Menu.Item key = "video">
+                <Link to="/video/main">视频直播</Link>
               </Menu.Item>
-              <Menu.Item key = "4">
-                <Link to="/live-room">直播间</Link>
+              <Menu.Item key = "room">
+                <Link to="/room/main">直播间</Link>
               </Menu.Item>
             </SubMenu>
-            <Menu.Item key = "5" >
+            <Menu.Item key = "authority-center" >
               <Link to="/authority-center"><Icon type = "lock" />权限中心</Link>
             </Menu.Item>
           </Menu>
@@ -95,14 +86,14 @@ class App extends Component {
         {/*这里右边*/}
         <div className="ant-layout-right">
           <div className="ant-layout-header">
-            <div className="ant-layout-breadcrumb" style={{float:'left'}}>
-              <Breadcrumb>
-                <Breadcrumb.Item>
-                  <Link to="/data-center">首页</Link>
-                </Breadcrumb.Item>
-                <Breadcrumb.Item>{this.state.data}</Breadcrumb.Item>
-              </Breadcrumb>
-            </div>
+            {/*<div className="ant-layout-breadcrumb" style={{float:'left'}}>
+             <Breadcrumb>
+             <Breadcrumb.Item>
+             <Link to="/data-center">首页</Link>
+             </Breadcrumb.Item>
+             <Breadcrumb.Item>{[children.props.children.props.route.name]}</Breadcrumb.Item>
+             </Breadcrumb>
+             </div>*/}
             <div style={{float:'right',marginRight:'20px'}}>admin | 退出 </div>
           </div>
 
@@ -113,7 +104,6 @@ class App extends Component {
           </div>
         </div>
       </article>
-
     );
   }
 }
