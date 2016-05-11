@@ -103,7 +103,7 @@ class LiveVideo extends React.Component{
       dataIndex: 'audit',
       render: (text) =>
         <div>
-          {!text ? <Tag color="yellow">关闭评论</Tag> :<Tag color="blue">开放评论</Tag>}
+          {text == 1 ? <Tag color="yellow">关闭评论</Tag> :<Tag color="blue">开放评论</Tag>}
         </div>
     },{
       key: 'operation',
@@ -215,6 +215,7 @@ class LiveVideo extends React.Component{
   }
 
   getVideoContent(video_id,record) {
+    this.setState({spin:true});
     //获取直播间的直播内容
     publicParams.service = 'Admin.GetVideoContent';
     publicParams.video_id = video_id;
@@ -307,6 +308,14 @@ class LiveVideo extends React.Component{
   componentWillMount() {
     this.getVideos();
     this.getVideoNum();
+  }
+
+  componentWillUnmount() {
+    sessionStorage.record = JSON.stringify(window.record);
+    sessionStorage.videoCheck = JSON.stringify(window.videoCheck);
+    sessionStorage.comments = JSON.stringify(window.comments);
+    sessionStorage.videoId = JSON.stringify(window.videoId);
+    sessionStorage.video = JSON.stringify(window.video);
   }
 
   render() {

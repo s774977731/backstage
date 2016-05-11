@@ -104,7 +104,7 @@ class LiveRoom extends React.Component{
       dataIndex: 'audit',
       render: (text) =>
       <div>
-        {!text ? <Tag color="yellow">关闭评论</Tag> :<Tag color="blue">开放评论</Tag>}
+        {text == 1 ? <Tag color="yellow">关闭评论</Tag> :<Tag color="blue">开放评论</Tag>}
       </div>
     },{
       key: 'operation',
@@ -241,7 +241,6 @@ class LiveRoom extends React.Component{
             data:result.data.rooms
           });
           console.log(result.data.rooms);
-          //存值到sessionStorage
         }
         if (result.data.num) {
             this.setState({
@@ -305,6 +304,14 @@ class LiveRoom extends React.Component{
   componentWillMount() {
     this.getRooms();
     this.getRoomNum();
+  }
+
+  componentWillUnmount() {
+    sessionStorage.record = JSON.stringify(window.record);
+    sessionStorage.roomCheck = JSON.stringify(window.roomCheck);
+    sessionStorage.comments = JSON.stringify(window.comments);
+    sessionStorage.roomId = JSON.stringify(window.roomId);
+    sessionStorage.room = JSON.stringify(window.room);
   }
 
   render() {

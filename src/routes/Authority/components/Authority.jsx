@@ -363,7 +363,7 @@ class Authority extends React.Component{
               <Form onSubmit={this.handleSubmit} form={this.props.form}>
                 <Col span="2" offset="11">
                   <Select onChange={this.changeSearch} defaultValue="title" size="large">
-                    <Option value="title">登陆名</Option>
+                    <Option value="title">登录名</Option>
                     <Option value="id">ID</Option>
                   </Select>
                 </Col>

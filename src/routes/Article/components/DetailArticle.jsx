@@ -16,6 +16,12 @@ import {
   Form
 } from 'antd';
 
+//全局链接
+let publicParamsJSON = sessionStorage.publicParams;
+let publicParams = JSON.parse(publicParamsJSON);
+let publicUrl = sessionStorage.publicUrl;
+
+
 class DetailArticle extends React.Component{
 
   constructor() {
@@ -24,11 +30,12 @@ class DetailArticle extends React.Component{
 
   renderContent() {
     if(window.article) {
+      var content;
       if(window.article.type == 1) {
-        var content = window.article.content;
+         content = window.article.content;
         return { __html: content }
       }else {
-        var content = window.article.article_url;
+         content = window.article.article_url;
         console.log(content);
         //return { __html: `<a href=${content} target="_blank"><p>${content}</p></a>` }
         return { __html: `<iframe src=${content} frameborder="0" style="width: 100%;height: 570px"></iframe>` }
@@ -41,7 +48,10 @@ class DetailArticle extends React.Component{
 
 
 
-  componentDidMount(){
+  componentWillMount(){
+    window.record = JSON.parse(sessionStorage.record);
+    window.article = JSON.parse(sessionStorage.article);
+    window.comments = JSON.parse(sessionStorage.comments);
     //console.log(window.article,22222)
   }
 
@@ -53,7 +63,7 @@ class DetailArticle extends React.Component{
             <article className="video-check-left" >
               <Row>
                 <h3>文章内容</h3>
-                {/*<p><a href="#/new-article">更新文章</a></p>*/}
+                <p><a href="#/article/new-article">修改文章</a></p>
               </Row>
               <div style={{height:'57rem',overflow:'auto',overflowX:'hidden'}}>
                 <div dangerouslySetInnerHTML={this.renderContent()} ></div>

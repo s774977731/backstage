@@ -40,6 +40,10 @@ let extend=function(o,n,override){
 function getStats(array = [], key) {
   return array.length ? array.map((value) => value[key]) : [];
 }
+//数组中某个值与之对比
+function compare(arr = [],value) {
+
+}
 
 class NewLiveRoom extends React.Component{
 
@@ -57,14 +61,15 @@ class NewLiveRoom extends React.Component{
       userId:'',
       titles:[],
       users:[],
-      fileList: [{
+      img_url:'',
+      fileList: window.room ? [{
         uid: -1,
         name: 'xxx.png',
         status: 'done',
-        url: window.room ? window.room.cover : 'https://os.alipayobjects.com/rmsportal/NDbkJhpzmLxtPhB.png',
-      }],
+        url: window.room.cover ,
+      }] : [],
       pic_is_change:false,
-      value:0
+      value:window.room ? Number(window.room.audit) : 0
     };
     this.handleClickDelete = this.handleClickDelete.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -75,6 +80,7 @@ class NewLiveRoom extends React.Component{
     this.handleImgChange = this.handleImgChange.bind(this);
     this.handleCreateUpdateRoom = this.handleCreateUpdateRoom.bind(this);
     this.handleRadioChange = this.handleRadioChange.bind(this);
+    this.handletitlesChange = this.handletitlesChange.bind(this);
   }
 
   columnsLeft() {
@@ -91,8 +97,9 @@ class NewLiveRoom extends React.Component{
         dataIndex: 'user_name',
       },{
         className:'text-right',
+        dataIndex:'title',
         render:(text,record) => <div>
-            <Select defaultValue={window.room ? record.title : "compere"} onChange={this.handletitlesChange.bind(this,record)} style={{ width: 90,textAlign:'center' }} >
+            <Select defaultValue={text} onChange={this.handletitlesChange.bind(this,record)} style={{ width: 90,textAlign:'center' }} >
             <Option value="compere">主持人</Option>
             <Option value="guest">嘉宾</Option>
             <Option value="commentator">评论员</Option>
@@ -198,42 +205,69 @@ class NewLiveRoom extends React.Component{
   }
 
   handletitlesChange(recode,value) {
-    recode.change = true
+    recode.change = true;
     recode.title = value;
-    //console.log(recode);
+    var hosts;
+    if(window.room) {
+        hosts = window.room.hosts;
+      //未添加或删除
+      for(var i=0;i<hosts.length;i++) {
+        if(hosts[i].user_id == recode.uid) {
+          hosts[i].title = recode.title;
+          hosts[i].change = recode.change;
+        }
+      }
+    }
+
+
+
+    console.log(recode);
   }
 
   handleCreateUpdateRoom() {
-    const { selectedRows, pic_is_change, img_url, fileList, value } = this.state;
+    const { selectedRows, img_url, value } = this.state;
+    var hosts;
+    if(window.room) {
+      hosts = window.room.hosts;
+    }
     let roomName = ReactDOM.findDOMNode(this.refs.roomName).childNodes[0].value;
     if(roomName.length == 0) {
       message.error('请输入频道名称');
       ReactDOM.findDOMNode(this.refs.roomName).childNodes[0].focus();
       return false;
     }
+    if(!selectedRows) {
+      message.info('请选择直播人');
+      return;
+    }
     let titles = getStats(selectedRows,'title');
     let uids = getStats(selectedRows,'uid');
 
     publicParams.name = roomName;
-    publicParams.uids = uids;
-    publicParams.titles = titles;
-    publicParams.cover = pic_is_change ? img_url : fileList.url ;
+    publicParams.cover = img_url;
     publicParams.audit = value;
     if(!window.room.id) {
+      if(!img_url) {
+        message.error('请上传图片');
+        return false;
+      }
+      publicParams.uids = uids;
+      publicParams.titles = titles;
       publicParams.service = 'Admin.CreateRoom';
-      //console.log(window.room,11111,publicParams);
     }else {
-      this.setState({
-        selectedRows
-      });
+      publicParams.service = 'Admin.UpdateRoom';
+      publicParams.room_id = window.roomId;
+      publicParams.cover = img_url ? img_url :window.room.cover;
+
+
       //没有添加或删除直播人
       if(selectedRows[0].user_id) {
         let userIds = getStats(selectedRows,'user_id');
+        let hoststitles = getStats(hosts,'title');
         publicParams.uids = userIds;
-        publicParams.titles = titles;
+        publicParams.titles = hoststitles;
       }else {
         //添加或删除直播人
-        const hosts = window.room.hosts;
         for(let i=0;i<selectedRows.length;i++) {
           for(let j=0;j<hosts.length;j++) {
             if(selectedRows[i].uid == hosts[j].user_id) {
@@ -245,17 +279,16 @@ class NewLiveRoom extends React.Component{
             }
           }
         }
+        this.setState({
+          selectedRows
+        });
+
         publicParams.uids = getStats(selectedRows,'uid');
         publicParams.titles = getStats(selectedRows,'title');
       }
-      //const hosts = window.room.hosts;
-      publicParams.service = 'Admin.UpdateRoom';
-      publicParams.room_id = window.roomId;
-      //console.log(selectedRows,'选择',publicParams);
-    }
-    if(!selectedRows) {
-      message.info('请选择直播人');
-      return;
+
+      console.log(hosts,11111,publicParams);
+      console.log(selectedRows);
     }
     reqwest({
       url: publicUrl,
@@ -317,17 +350,25 @@ class NewLiveRoom extends React.Component{
   }
 
   returnDataSource() {
-    const { selectedRowKeys, data } = this.state;
-    var dataArr = [];
-    //console.log(selectedRowKeys, data);
-    for(let i=0;i<data.length;i++) {
-      for(let j=0;j<selectedRowKeys.length;j++) {
-        if(data[i].user_name == selectedRowKeys[j]) {
-          dataArr.push(data[i]);
-        }
-      }
-    }
-    return dataArr;
+    const { selectedRowKeys, data, selectedRows } = this.state;
+    return selectedRows;
+    //let hosts = window.room.hosts
+    //没有增加或删除直播人
+    //if(selectedRows[0]) {
+    //  return selectedRows
+    //}
+    ////增加或删除直播人
+    //var dataArr = [];
+    ////console.log(selectedRowKeys, data);
+    //for(let i=0;i<data.length;i++) {
+    //  for(let j=0;j<selectedRowKeys.length;j++) {
+    //    if(data[i].user_name == selectedRowKeys[j]) {
+    //      dataArr.push(data[i]);
+    //    }
+    //  }
+    //}
+    //console.log(dataArr);
+    //return dataArr;
   }
 
   /**
@@ -352,7 +393,7 @@ class NewLiveRoom extends React.Component{
           //this.setState({
           //  data: data
           //});
-          message.success('您已删除该评论');
+          message.success('您已解除该主播人直播权限');
         }
       },
       error: (err) => {
@@ -529,7 +570,7 @@ class NewLiveRoom extends React.Component{
         record,
         selection:true
       });
-      //console.log(selectedRows);
+      console.log(selectedRows);
   }
 
   onSelectAll(selected, selectedRows, changeRows) {
@@ -538,9 +579,8 @@ class NewLiveRoom extends React.Component{
     })
   }
 
-
   onSelectChange(selectedRowKeys) {
-        //console.log('selectedRowKeys changed: ', selectedRowKeys);
+        console.log('selectedRowKeys changed: ', selectedRowKeys);
         this.setState({ selectedRowKeys });
         sessionStorage.selectedRowKeys = JSON.stringify(selectedRowKeys);
   }
@@ -556,11 +596,14 @@ class NewLiveRoom extends React.Component{
 
 
   componentWillMount() {
+    window.room = JSON.parse(sessionStorage.room);
+    window.roomId = JSON.parse(sessionStorage.roomId);
+    window.record = JSON.parse(sessionStorage.record);
     this.getTableRight();
   }
-  componentDidMount() {
-    console.log(this.state.pic_is_change);
-  }
+  //componentDidMount() {
+    //console.log(window.room,this.state.selectedRows);
+  //}
 
   render() {
     const { selectedRowKeys } = this.state;
@@ -580,14 +623,16 @@ class NewLiveRoom extends React.Component{
             <Input ref="roomName" defaultValue={this.renderRoomName()} placeholder="输入或更改频道名称" />
             {this.renderPicture()}
           </header>
-          <article className="col-23 new-live-video-left-article">
+          <article className="col-23">
             <div style={{fontSize:'1.5rem',marginBottom:'5px'}}>该频道的直播人</div>
             <Table
-              pagination={{pageSize:4}}
+              rowKey={record => record.user_name}
               columns={this.columnsLeft()}
-              dataSource={this.returnDataSource()} />
+              dataSource= {this.returnDataSource()}
+              pagination={false}
+              useFixedHeader/>
           </article>
-          <footer className="col-23" style={{marginTop:'3rem'}}>
+          <footer className="col-23" style={{marginBottom:'2rem'}}>
             <p>评论权限</p>
             <br />
             <Row>
@@ -614,7 +659,8 @@ class NewLiveRoom extends React.Component{
                      rowSelection={rowSelection}
                      columns={this.columns()}
                      dataSource={this.state.data}
-                     pagination={{ pageSize: 8}} />
+                     pagination={false}
+                     useFixedHeader/>
             </div>
           </section>
         </div>

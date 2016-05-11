@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router';
+import reqwest from 'reqwest';
 import md5 from 'md5';
 import {
   DatePicker,
@@ -14,11 +15,29 @@ import {
 } from 'antd';
 const SubMenu = Menu.SubMenu;
 
+//全局链接
+//var publicUrl = 'http:192.168.0.8/backend/Public/video';
+var publicUrl = 'http://bi.webei.cn/video';
+var timestamp = Date.parse(new Date());
+var publicParams = {};
+publicParams.app = 1;
+publicParams.t = timestamp;
+publicParams.sign=md5(timestamp+'lowkey');
+ //publicParams.user_id=64;
+ //publicParams.token='3315cfc6b45b0c722b091dd8224bad46';
+publicParams.user_id = sessionStorage.user_id;
+publicParams.token = sessionStorage.token;
+
+var publicParamsJSON = JSON.stringify(publicParams);
+sessionStorage.publicParams = publicParamsJSON;
+sessionStorage.publicUrl = publicUrl;
+
+
 class App extends Component {
   constructor() {
     super();
     this.state = {
-      //current:'1',
+      Authority:false,
       data:'数据中心'
     };
     this.handleClick = this.handleClick.bind(this);
@@ -46,9 +65,46 @@ class App extends Component {
     console.log(window.key);
   }
 
+  handleLogout() {
+    publicParams.service = 'Admin.Logout';
+    reqwest({
+      url: publicUrl+'/?service=Admin.Logout',
+      method: 'post',
+      data: publicParams,
+      type: 'json',
+      withCredentials: true,
+      success: (result) => {
+        console.log(result.data);
+        if(result.data.code == 0) {
+          window.location.href = '../index.html'
+        }
+      }
+    });
+  }
+
+  componentWillMount() {
+    publicParams.service = 'Admin.GetAdmins';
+    reqwest({
+      url: publicUrl,
+      method: 'post',
+      data: publicParams,
+      type: 'jsonp',
+      withCredentials: true,
+      success: (result) => {
+        //console.log(result.data)
+        if(result.data.code != 10) {
+          this.setState({
+            Authority:true
+          })
+        }
+      }
+    });
+  }
+
   render() {
+    const { Authority } = this.state;
     const { location, children } = this.props;
-    console.log(children.props);
+    //console.log(children.props);
     return (
       <article className="ant-layout-main">
         {/*这里左边*/}
@@ -78,9 +134,12 @@ class App extends Component {
                 <Link to="/room/main">直播间</Link>
               </Menu.Item>
             </SubMenu>
-            <Menu.Item key = "authority-center" >
-              <Link to="/authority-center"><Icon type = "lock" />权限中心</Link>
-            </Menu.Item>
+            {
+              Authority ?
+                <Menu.Item key = "authority-center" >
+                  <Link to="/authority-center"><Icon type = "lock" />权限中心</Link>
+                </Menu.Item> : <div></div>
+            }
           </Menu>
         </aside>
         {/*这里右边*/}
@@ -94,9 +153,8 @@ class App extends Component {
              <Breadcrumb.Item>{[children.props.children.props.route.name]}</Breadcrumb.Item>
              </Breadcrumb>
              </div>*/}
-            <div style={{float:'right',marginRight:'20px'}}>admin | 退出 </div>
+            <div onClick={this.handleLogout} style={{float:'right',marginRight:'20px',cursor:'pointer'}}>admin | 退出 </div>
           </div>
-
           <div className="ant-layout-container">
             <div className="ant-layout-content">
               {this.props.children}

@@ -55,13 +55,14 @@ class NewLiveRoom extends React.Component{
       nickName:'',
       userId:'',
       titles:[],
-      fileList: [{
+      img_url:'',
+      fileList: window.video ? [{
         uid: -1,
         name: 'xxx.png',
         status: 'done',
-        url: window.video ? window.video.cover : 'https://os.alipayobjects.com/rmsportal/NDbkJhpzmLxtPhB.png',
-      }],
-      value:0
+        url: window.video.cover,
+      }] : [],
+      value:window.video ? Number(window.video.audit) : 0
     };
     this.handleClickDelete = this.handleClickDelete.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -196,13 +197,29 @@ class NewLiveRoom extends React.Component{
 
   handletitlesChange(recode,value) {
     this.change = true;
-    recode.title = value;
+    recode.view_code = value;
     console.log(value);
+    var views;
+    if(window.video) {
+      views = window.video.views;
+      //未添加或删除
+      for(var i=0;i<views.length;i++) {
+        if(views[i].user_id == recode.uid) {
+          views[i].view_code = recode.view_code;
+          views[i].change = recode.change;
+        }
+      }
+    }
   }
 
   handleCreateUpdateVideo() {
     const { selectedRows, pic_is_change, img_url, fileList, value } = this.state;
     let roomName = ReactDOM.findDOMNode(this.refs.roomName).childNodes[0].value;
+    var views;
+    if(window.video) {
+      views = window.video.views;
+    }
+
     if(!selectedRows) {
       message.info('请选择直播人');
       return;
@@ -220,39 +237,43 @@ class NewLiveRoom extends React.Component{
       message.info('请添加直播人');
       return false;
     }
+
     let uids = getStats(selectedRows,'uid');
-    let titles = getStats(selectedRows,'title');
-    //判断是否有重复元素
-    let sortArray = titles.sort();
-      for(let i=0;i<sortArray.length;i++) {
-        if(sortArray[i] == sortArray[i+1] && sortArray.length > 1) {
-          message.info('不能选择两个相同的视角');
-          return false;
-        }
-      }
+    let codes = getStats(selectedRows,'view_code');
+    ////判断是否有重复元素
+    //let sortArray = codes.sort();
+    //  for(let i=0;i<sortArray.length;i++) {
+    //    if(sortArray[i] == sortArray[i+1] && sortArray.length > 1) {
+    //      message.info('不能选择两个相同的视角');
+    //      return false;
+    //    }
+    //  }
+
 
     publicParams.name = roomName;
-    publicParams.cover = pic_is_change ? img_url : fileList.url ;
-    publicParams.codes = titles;
-    publicParams.uids = uids;
+    publicParams.cover = img_url ;
     publicParams.audit = this.state.value;
     if(!window.video) {
+      if(!img_url) {
+        message.error('请上传图片');
+        return false;
+      }
+      publicParams.codes = codes;
+      publicParams.uids = uids;
       publicParams.service = 'Admin.CreateVideo';
     }else {
       publicParams.service = 'Admin.UpdateVideo';
       publicParams.video_id = window.video.id;
+      publicParams.cover = img_url ? img_url :window.video.cover;
 
-      this.setState({
-        selectedRows
-      });
-
+      //没有添加或删除直播人
       if(selectedRows[0].user_id) {
         let userIds = getStats(selectedRows,'user_id');
+        let viewscodes = getStats(views,'view_code');
         publicParams.uids = userIds;
-        publicParams.titles = titles;
+        publicParams.codes = viewscodes;
       }else {
         //添加或删除直播人
-        const views = window.video.views;
         for(let i=0;i<selectedRows.length;i++) {
           for(let j=0;j<views.length;j++) {
             if(selectedRows[i].uid == views[j].user_id) {
@@ -264,8 +285,13 @@ class NewLiveRoom extends React.Component{
             }
           }
         }
+
+        this.setState({
+          selectedRows
+        });
+
         publicParams.uids = getStats(selectedRows,'uid');
-        publicParams.titles = getStats(selectedRows,'title');
+        publicParams.codes = getStats(selectedRows,'view_code');
       }
     }
 
@@ -332,17 +358,19 @@ class NewLiveRoom extends React.Component{
   }
 
   returnDataSource() {
-    const { selectedRowKeys, data } = this.state;
-    var dataArr = [];
-    console.log(selectedRowKeys, data);
-    for(let i=0;i<data.length;i++) {
-      for(let j=0;j<selectedRowKeys.length;j++) {
-        if(data[i].user_name == selectedRowKeys[j]) {
-          dataArr.push(data[i]);
-        }
-      }
-    }
-    return dataArr;
+    const { selectedRows } = this.state;
+    return selectedRows;
+    //const { selectedRowKeys, data } = this.state;
+    //var dataArr = [];
+    //console.log(selectedRowKeys, data);
+    //for(let i=0;i<data.length;i++) {
+    //  for(let j=0;j<selectedRowKeys.length;j++) {
+    //    if(data[i].user_name == selectedRowKeys[j]) {
+    //      dataArr.push(data[i]);
+    //    }
+    //  }
+    //}
+    //return dataArr;
   }
 
   /**
@@ -578,6 +606,9 @@ class NewLiveRoom extends React.Component{
 
 
   componentWillMount() {
+    window.videoId = JSON.parse(sessionStorage.videoId);
+    window.video = JSON.parse(sessionStorage.video);
+    window.record = JSON.parse(sessionStorage.record);
     this.getTableRight();
   }
   componentDidMount() {
@@ -605,11 +636,13 @@ class NewLiveRoom extends React.Component{
           <article className="col-23 new-live-video-left-article">
             <div style={{fontSize:'1.5rem',marginBottom:'5px'}}>该频道的直播人</div>
             <Table
-              pagination={{pageSize:4}}
+              rowKey={record => record.user_name}
+              pagination={false}
               columns={this.columnsLeft()}
-              dataSource={this.returnDataSource()} />
+              dataSource={this.returnDataSource()}
+              useFixedHeader/>
           </article>
-          <footer className="col-23" style={{marginTop:'2rem'}}>
+          <footer className="col-23">
             <p>评论权限</p>
             <br />
             <Row>
@@ -636,7 +669,8 @@ class NewLiveRoom extends React.Component{
                      rowSelection={rowSelection}
                      columns={this.columns()}
                      dataSource={this.state.data}
-                     pagination={{ pageSize: 8}} />
+                     pagination={false}
+                     useFixedHeader/>
             </div>
           </section>
         </div>

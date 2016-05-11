@@ -54,6 +54,7 @@ class Article extends React.Component {
     this.handleChange = this.handleChange.bind(this);
     this.getArticleNum = this.getArticleNum.bind(this);
     this.changeSearch = this.changeSearch.bind(this);
+    this.onSelectAll = this.onSelectAll.bind(this);
   }
 
   columns() {
@@ -93,10 +94,10 @@ class Article extends React.Component {
         render: (text, record) =>
             <span>
               <a onClick={this.enterDetailArticle.bind(this,record.article_id,record)}>
-                <Icon type="link"/>
-                <span className="ant-divider" />
                 <Icon type="message"/>{record.comment_num}
               </a>
+              <span className="ant-divider" />
+              <a onClick={this.modifyArticle.bind(this,record.article_id,record)}>修改</a>
               <span className="ant-divider" />
               <Popconfirm
                 title="确定要删除这个篇文章吗？"
@@ -221,6 +222,45 @@ class Article extends React.Component {
     publicParams.type = 1;
     publicParams.id = article_id;
     this.fetch();
+    window.record = record;
+    console.log(record);
+  }
+
+  modifyArticle(article_id,record) {
+    //获取文章内容
+    publicParams.service = 'Admin.GetArticle';
+    publicParams.article_id = article_id;
+    reqwest({
+      url: publicUrl,
+      method: 'get',
+      data: publicParams,
+      type: 'jsonp',
+      withCredentials: true,
+      success: (result) => {
+        if(result.data.article) {
+          window.article = result.data.article;
+        }
+      }
+    });
+    //获取评论列表
+    publicParams.service = 'Admin.GetComments';
+    publicParams.type = 1;
+    publicParams.id = article_id;
+    reqwest({
+      url: publicUrl,
+      method: 'get',
+      data: publicParams,
+      type: 'jsonp',
+      withCredentials: true,
+      success: (result) => {
+        if(result.data.comments) {
+          window.comments = result.data.comments;
+          setTimeout(function () {
+            window.location.href = '#/article/new-article';
+          },400)
+        }
+      }
+    });
     window.record = record;
     console.log(record);
   }
@@ -366,12 +406,20 @@ class Article extends React.Component {
     console.log(selectedRows);
   }
 
+  onSelectAll(selected, selectedRows, changeRows) {
+    this.setState({
+      selectedRows
+    });
+  }
+
   handleChange(current) {
     console.log(current);
     publicParams.page = current;
     window.articlePage = current;
     this.getArticles()
   }
+
+
 
   getArticles() {
     publicParams.service = 'Admin.GetArticles';
@@ -388,13 +436,20 @@ class Article extends React.Component {
     this.getArticleNum()
   }
 
+  componentWillUnmount() {
+    sessionStorage.record = JSON.stringify(window.record);
+    sessionStorage.article = JSON.stringify(window.article);
+    sessionStorage.comments = JSON.stringify(window.comments);
+  }
+
   render() {
     const { selectedRowKeys, spin } = this.state;
     const { getFieldProps } = this.props.form;
     const rowSelection = {
       selectedRowKeys,
       onChange: this.onSelectChange,
-      onSelect: this.onSelect.bind(this)
+      onSelect: this.onSelect.bind(this),
+      onSelectAll:this.onSelectAll.bind(this),
     };
     const hasSelected = selectedRowKeys.length > 0;
     return (

@@ -23,7 +23,6 @@ let publicParamsJSON = sessionStorage.publicParams;
 let publicParams = JSON.parse(publicParamsJSON);
 let publicUrl = sessionStorage.publicUrl;
 
-
 window.deleteRoomComment = function (i) {
   console.log(window.roomCheck[i]);
   publicParams.service = 'Admin.DeleteRoomContent';
@@ -37,7 +36,7 @@ window.deleteRoomComment = function (i) {
     success: (result) => {
       console.log(result);
       if(result.data.code == 0) {
-        message.success('删除评论成功');
+        message.success('删除直播内容成功');
         $(`#x${i}`).fadeOut();
       }
     },
@@ -54,6 +53,23 @@ window.deleteRoomComment = function (i) {
     }
   });
 };
+
+window.roomContent = function(i) {
+  const contentList = window.roomCheck;
+  switch (contentList[i].type) {
+    case '1':
+          return contentList[i].content+'<br/>【图片】';
+    break;
+    case '2':
+          return contentList[i].content+'<br/>【视频】';
+    break;
+    case '3':
+          return contentList[i].content+'<br/>【语音】';
+    default:
+          return contentList[i].content;
+    break;
+  }
+}
 
 class VideoCheck extends React.Component{
 
@@ -81,18 +97,18 @@ class VideoCheck extends React.Component{
             <div class="col-2 commentList borderTopLeft">
             <img style="width:20px;margin-top: 8px" src=${contentList[i].icon_url} />
             </div>
-            <div class="col-3 commentList" >
+            <div class="col-5 commentList" style="white-space:nowrap">
             ${contentList[i].name}
             </div>
-            <div class="col-15 commentList" style="text-align: left">
+            <div class="col-13 commentList" style="text-align: left">
             ${moment.unix(contentList[i].create_time).format('YYYY-MM-DD')}
             </div>
             <div class="col-4 commentList borderTopRight" >
               <i onclick="window.deleteRoomComment(${i})" class="anticon anticon-delete commentListRight"></i>
             </div>
           </Row>
-          <div style="margin-left: 5px">
-            ${contentList[i].content}
+          <div style="margin-left: 10px" class="content">
+            ${window.roomContent(i)}
           </div>
         </div>
           `
@@ -198,7 +214,18 @@ class VideoCheck extends React.Component{
       }, {
         title: '角色',
         width: '25%',
-        dataIndex: 'title'
+        dataIndex: 'title',
+        render:(text) => {
+          if(text == 'compere') {
+            return '主持人'
+          }else if(text == 'guest') {
+            return '嘉宾'
+          }else if(text == 'commentator') {
+            return '评论员'
+          }else {
+            return '主持人'
+          }
+        }
       },{
         title: '',
         className:'text-right',
@@ -263,6 +290,9 @@ class VideoCheck extends React.Component{
   }
 
   componentWillMount() {
+    window.record = JSON.parse(sessionStorage.record);
+    window.roomCheck = JSON.parse(sessionStorage.roomCheck);
+    window.comments = JSON.parse(sessionStorage.comments);
     console.log(window.roomCheck)
   }
 
@@ -274,7 +304,7 @@ class VideoCheck extends React.Component{
           <Button onClick={this.handleClick} size="large" type="ghost"><Icon type="cross-circle" />
             {window.record.delete ? '删除直播' :'结束直播'}
           </Button>
-          <span>&nbsp;&nbsp;温州市2016年全民马拉松</span>
+          <span style={{marginLeft:'3rem',fontSize:'1.5rem'}}>{window.record.name}</span>
           <Button onClick={this.renderModal} style={{float:'right'}} size="large" type="ghost"><Icon type="user" />该频道直播人</Button>
         </header>
         {/*Modal*/}

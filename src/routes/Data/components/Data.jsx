@@ -19,19 +19,9 @@ const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
 
 //全局链接
-//var publicUrl = 'http:192.168.0.8/backend/Public/video';
-var publicUrl = 'http://bi.webei.cn/video';
-var timestamp = Date.parse(new Date());
-var publicParams = {};
-publicParams.app = 1;
-publicParams.t = timestamp;
-publicParams.sign=md5(timestamp+'lowkey');
-publicParams.user_id=1;
-publicParams.token='74c23bcb718cf1e93827cd43c9015f84';
-
-var publicParamsJSON = JSON.stringify(publicParams);
-sessionStorage.publicParams = publicParamsJSON;
-sessionStorage.publicUrl = publicUrl;
+let publicParamsJSON = sessionStorage.publicParams;
+let publicParams = JSON.parse(publicParamsJSON);
+let publicUrl = sessionStorage.publicUrl;
 
 //对象转化为数组
 function transform(obj){
@@ -114,14 +104,15 @@ class DataCenter extends React.Component{
   }
 
   handleTotalChange(e) {
+    console.log(e);
     publicParams.service = 'Admin.GetCumulativeUserNum';
-    publicParams.day = e.target.value;
+    publicParams.day = e ? e.target.value : 3;
     this.fetch()
   }
 
   handleNewChange(e) {
     publicParams.service = 'Admin.GetNewAddedUserNum';
-    publicParams.day = e.target.value;
+    publicParams.day = e ? e.target.value : 3;
     reqwest({
       url: publicUrl,
       method: 'get',
@@ -150,7 +141,7 @@ class DataCenter extends React.Component{
 
   handleActiveChange(e) {
     publicParams.service = 'Admin.GetActiveUserNum';
-    publicParams.day = e.target.value;
+    publicParams.day = e ? e.target.value : 3;
     reqwest({
       url: publicUrl,
       method: 'get',
@@ -181,7 +172,18 @@ class DataCenter extends React.Component{
   getCumulativeUserNum() {
     publicParams.service = 'Admin.GetCumulativeUserNum';
     publicParams.day = 1;
-    this.fetch()
+    reqwest({
+      url: publicUrl,
+      method: 'get',
+      data: publicParams,
+      type: 'jsonp',
+      success: (result) => {
+        let totalNew = transform(result.data.num).pop();
+        this.setState({
+          totalNew:totalNew
+        });
+      }
+    })
   }
 
   getNewAddedUserNum() {
@@ -193,7 +195,6 @@ class DataCenter extends React.Component{
       data: publicParams,
       type: 'jsonp',
       success: (result) => {
-        //console.log(result.data.num);
         let newNum = transform(result.data.num).pop();
         this.setState({
           newNum:newNum
@@ -214,7 +215,6 @@ class DataCenter extends React.Component{
       data: publicParams,
       type: 'jsonp',
       success: (result) => {
-        //console.log(result.data.num);
         let activeNum = transform(result.data.num).pop();
         this.setState({
           activeNum:activeNum
@@ -230,6 +230,12 @@ class DataCenter extends React.Component{
     this.getCumulativeUserNum();
     this.getActiveUserNum();
     this.getNewAddedUserNum();
+  }
+
+  componentDidMount() {
+    this.handleTotalChange();
+    this.handleNewChange();
+    this.handleActiveChange();
   }
 
   render() {

@@ -7,8 +7,8 @@
     <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
     <title>Welcome</title>
     <!-- Bootstrap -->
-    <link href="sources/bootstrap.min.css" rel="stylesheet">
-    <link href="Login.css" rel="stylesheet">
+    <link href="sources/source/bootstrap.min.css" rel="stylesheet">
+    <link href="sources/src/Login.css" rel="stylesheet">
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -18,12 +18,11 @@
 </head>
 <body>
 <div>
-    <nav class="navbar navbar-default ">
+    <nav class="navbar">
         <div class="container-fluid">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
-                <a class="navbar-brand" style="width: 8rem" href="#"><img class="img-responsive" src="http://static.webei.cn/business/images/themeLogo.png"/></a>
-                <a class="navbar-brand" href="#">微贝粉丝互动解决方案</a>
+                <a class="navbar-brand" style="width: 8rem" href="#"><img width="100" src="sources/src/wenzhou.png"/></a>
             </div>
         </div><!-- /.container-fluid -->
     </nav>
@@ -38,10 +37,10 @@
             <div class="container col-sm-10 col-sm-offset-1">
                 <h3 style="text-align: center">登录</h3>
                 <hr />
-                <div class="col-sm-6">
-                    <form action="" id="LoginForm" class="form-signin" style="margin-bottom: -2rem">
-                        <label for="inputPhone" class="sr-only">请输入手机号</label>
-                        <input type="tel" name="username" id="inputPhone" class="form-control" placeholder="请输入手机号" maxlength="11">
+                <div class="col-sm-12">
+                    <form action="" id="LoginForm" class="form-signin" style="margin-bottom: -2rem;min-width: 250px">
+                        <label for="inputPhone" class="sr-only">请输入管理员账号</label>
+                        <input type="tel" name="username" id="inputPhone" class="form-control" placeholder="请输入管理员账号">
                         <label for="inputPassword" class="sr-only">请输入密码</label>
                         <input type="password" name="password" id="inputPassword" class="form-control" placeholder="请输入密码">
                         <div style="margin-bottom: 2.5rem;text-align: right">
@@ -50,23 +49,29 @@
                         <button id="loginBtn" class="btn btn-lg btn-primary btn-block" type="submit">登录</button>
                     </form>
                 </div>
-                <div class="col-sm-6 signin-right">
-                    <div class="row">
-                        <img src="http://static.webei.cn/business/images/weixin.jpg" class="col-sm-6 col-sm-offset-3 col-xs-6 col-xs-offset-3" alt="Responsive image">
-                    </div>
-                    <div class="row">
-                        <p style="margin-top: 1rem">关注微贝粉丝圈公众号</p>
-                        <p>了解最新产品动态/咨询</p>
-                    </div>
-                </div>
             </div>
         </fieldset>
+      <div class="modal fade bs-example-modal-sm" id="getModal">
+        <div class="modal-dialog  modal-sm">
+          <div class="modal-content">
+            <br />
+            <div class="modal-header">
+              <h4 class="modal-title">登录失败</h4>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" id="PassConfirm" data-dismiss="modal">确定</button>
+            </div>
+          </div>
+          <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+      </div>
     </div>
 </div>
 
-<script src="sources/jquery-2.1.4.min.js"></script>
-<script src="sources/jquery.md5.js"></script>
-<script src="sources/bootstrap.min.js"></script>
-<script src="Login.js"></script>
+<script src="sources/source/jquery-2.1.4.min.js"></script>
+<script src="sources/source/jquery.md5.js"></script>
+<script src="sources/source/bootstrap.min.js"></script>
+<script src="sources/src/Login.js"></script>
 </body>
 </html>

@@ -72,6 +72,9 @@ class VideoCheck extends React.Component{
         }
       }
     }
+    window.record = JSON.parse(sessionStorage.record);
+    window.videoCheck = JSON.parse(sessionStorage.videoCheck);
+    window.comments = JSON.parse(sessionStorage.comments);
   }
 
 
@@ -369,7 +372,7 @@ class VideoCheck extends React.Component{
                 </div>
                 <div style={{position:'relative',marginLeft:'218px',marginTop:'188px'}}>
                   <Tag color="red" style={{cursor:'pointer'}} onClick={this.code1}>
-                    {this.state.pause1 ? <Icon type="play-circle-o" /> : <Icon type="delete"/>}
+                    {this.state.pause1 ? <Icon type="pause-circle-o" /> : <Icon type="delete"/>}
                   </Tag>
                 </div>
               </div>
@@ -380,7 +383,7 @@ class VideoCheck extends React.Component{
                 </div>
                 <div style={{position:'relative',marginLeft:'218px',marginTop:'188px'}}>
                   <Tag color="red" style={{cursor:'pointer'}} onClick={this.code2}>
-                    {this.state.pause2 ? <Icon type="play-circle-o" /> : <Icon type="delete"/>}
+                    {this.state.pause2 ? <Icon type="pause-circle-o" /> : <Icon type="delete"/>}
                   </Tag>
                 </div>
               </div>
@@ -393,7 +396,7 @@ class VideoCheck extends React.Component{
                 </div>
                 <div style={{position:'relative',marginLeft:'218px',marginTop:'188px'}}>
                   <Tag color="red" style={{cursor:'pointer'}} onClick={this.code3}>
-                    {this.state.pause3 ? <Icon type="play-circle-o" /> : <Icon type="delete"/>}
+                    {this.state.pause3 ? <Icon type="pause-circle-o" /> : <Icon type="delete"/>}
                   </Tag>
                 </div>
               </div>
@@ -404,13 +407,13 @@ class VideoCheck extends React.Component{
                 </div>
                 <div style={{position:'relative',marginLeft:'218px',marginTop:'188px'}}>
                   <Tag color="red" style={{cursor:'pointer'}} onClick={this.code4}>
-                    {this.state.pause4 ? <Icon type="play-circle-o" /> : <Icon type="delete"/>}
+                    {this.state.pause4 ? <Icon type="pause-circle-o" /> : <Icon type="delete"/>}
                   </Tag>
                 </div>
               </div>
             </Row>
           </div>
-          <div className="col-10 col-offset-1" style={{float:'left',minWidth:'440px',maxWidth:'600px'}}>
+          <div className="col-10 col-offset-1" style={{float:'right',minWidth:'440px',maxWidth:'600px'}}>
             <PublicComments />
           </div>
         </Row>

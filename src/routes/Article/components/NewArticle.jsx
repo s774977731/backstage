@@ -44,13 +44,13 @@ class NewArticle extends React.Component{
       value:1,
       text:'',
       tabkey:'1',
-      fileList:[{
+      fileList: window.article ? [{
         uid: -1,
         name: 'xxx.png',
         status: 'done',
-        url: window.article ? window.article.image_url : 'https://os.alipayobjects.com/rmsportal/NDbkJhpzmLxtPhB.png',
-      }],
-      img_url:'http://static.v1.5.webei.cn/business/images/forum_logo.png'
+        url: window.article.image_url,
+      }] : [],
+      img_url:''
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     //this.showModal = this.showModal.bind(this);
@@ -61,6 +61,8 @@ class NewArticle extends React.Component{
     this.renderDefaultKey = this.renderDefaultKey.bind(this);
     this.hangleTitleChange = this.hangleTitleChange.bind(this);
     this.returnImg_url = this.returnImg_url.bind(this);
+    this.handleLinkChange = this.handleLinkChange.bind(this);
+    this.handleCheckChange = this.handleCheckChange.bind(this);
   }
 
   fetch() {
@@ -68,34 +70,36 @@ class NewArticle extends React.Component{
       url: publicUrl+'/?service=Admin.AddArticle',
       method: 'post',
       data: publicParams,
-      //type: 'json',
+      type: 'jsonp',
       withCredentials: true,
       success: (result) => {
         console.log(result);
-        //if (result.data.code == 0) {
-        //  if(window.article) {
-        //    message.success('更新文章成功');
-        //  }else {
-        //    message.success('添加文章成功');
-        //  }
-        //}else
-        //if (result.data.code == 1){
-        //  if(window.article) {
-        //    message.success('更新文章失败');
-        //  }else {
-        //    message.success('添加文章失败');
-        //  }
-        //}else{
-        //  message.info('请重新登录');
-        //}
-        if(result.data.code == 0) {
-          message.success('添加文章成功');
-          setTimeout(function(){
-            window.location.href = '#/article/main'
-          },500);
+        if (result.data.code == 0) {
+          if(window.article) {
+            message.success('更新文章成功');
+          }else {
+            message.success('添加文章成功');
+          }
+          window.location.href = '#/article/main'
+        }else if(result.data.code == 1){
+          if(window.article) {
+            message.success('更新文章失败');
+          }else {
+            message.success('添加文章失败');
+          }
+        }else if(result.data.code == 2) {
+          message.info('最多只能推荐4个，请取消其他推荐');
         }else {
-          message.error('添加文章失败')
+          message.info('请重新登录');
         }
+        //if(result.data.code == 0) {
+        //  message.success('添加文章成功');
+        //  setTimeout(function(){
+        //    window.location.href = '#/article/main'
+        //  },500);
+        //}else {
+        //  message.error('添加文章失败')
+        //}
       },
       error: (err) => {
         console.log(err);
@@ -112,44 +116,46 @@ class NewArticle extends React.Component{
   }
 
   returnImg_url() {
-    if(window.article) {
+    const { img_url } = this.state;
+
+    if(!img_url) {
       return  window.article.image_url
     }else {
-      return this.state.img_url
+      return img_url
     }
   }
 
   handleSubmit(e) {
-    var content = this.ue.getContent();
-    console.log(content);
-    const { value, text } = this.state;
     e.preventDefault();
+    const { img_url, articleTitle, value, articleLink, recommend} = this.state;
+    if(this.ue) {
+      var content = this.ue.getContent();
+    }
     console.log('收到表单值：', this.props.form.getFieldsValue());
     let formValue = this.props.form.getFieldsValue();
 
-    //let params =   {
-    //  type:value,
-    //  content:content,
-    //  title:formValue.title,
-    //  image_url:this.returnImg_url() || "",
-    //  url:formValue.link  || '',
-    //  recommended:Number(formValue.recommended) || 0,
-    //  banner:Number(formValue.banner) || 0
-    //};
     publicParams.type = value;
     publicParams.content = content;
-    publicParams.title = formValue.title;
-    publicParams.image_url = this.returnImg_url() || "";
-    publicParams.url = formValue.link  || '';
+    publicParams.title = articleTitle;
+    publicParams.image_url = this.returnImg_url();
+    publicParams.url = articleLink;
     publicParams.recommended = Number(formValue.recommended) || 0;
-    publicParams.service = 'Admin.AddArticle';
-    //if(window.article) {
-    //  publicParams.article_id = window.article.article_id;
-    //  publicParams.service = 'Admin.UpdateArticle';
-    //}else {
-    //  publicParams.service = 'Admin.AddArticle';
-    //}
-    //extend(publicParams,params);
+    //publicParams.service = 'Admin.AddArticle';
+      //更新文章
+    if(window.article) {
+      publicParams.recommended = Number(formValue.recommended) || window.article.recommend;
+      publicParams.url = articleLink || window.article.article_url;
+      publicParams.title = articleTitle || window.article.article_title;
+      publicParams.article_id = window.article.article_id;
+      publicParams.service = 'Admin.UpdateArticle';
+    }else {
+      //添加文章
+      //if(!img_url) {
+      //  message.error('请上传图片');
+      //  return false;
+      //}
+      publicParams.service = 'Admin.AddArticle';
+    }
     console.log(publicParams);
     this.fetch();
   }
@@ -224,11 +230,32 @@ class NewArticle extends React.Component{
   }
 
   hangleTitleChange(e) {
+    console.log(e.target.value);
     this.setState({articleTitle:e.target.value});
   }
 
+  handleLinkChange(e) {
+    console.log(e.target.value);
+    this.setState({
+      articleLink:e.target.value
+    })
+  }
+
+  handleCheckChange(e) {
+    console.log(e.target.checked);
+    var recommended;
+    if(e.target.checked) {
+      recommended = 1;
+    }else {
+      recommended = 0
+    }
+    this.setState({
+      recommend:recommended
+    })
+  }
+
   renderArticleName() {
-    const {articleTitle} = this.state;
+    const { articleTitle } = this.state;
     if(window.article) {
       if(articleTitle) {
         return articleTitle;
@@ -239,24 +266,52 @@ class NewArticle extends React.Component{
     }
   }
 
+  renderLink(e) {
+    const { articleLink } = this.state;
+    if(window.article) {
+      if(articleLink) {
+        return articleLink;
+      }
+      return window.article.article_url;
+    }else {
+      return articleLink;
+    }
+  }
+
+  renderCheckbox() {
+    if(window.article) {
+      if(window.article.recommend == 1) {
+        return true
+      }else {
+        return false
+      }
+    }
+  }
+
   componentWillMount() {
+    window.record = JSON.parse(sessionStorage.record);
+
+    window.comments = JSON.parse(sessionStorage.comments);
     this.renderDefaultKey()
   }
 
   componentDidMount() {
+    const { tabkey } = this.state;
     console.log(window.article,1123123);
-    this.ue = UE.getEditor('ueditContainer',{
-      initialFrameHeight:'200',
-      autoHeightEnabled: false,
-      enableAutoSave:true,
-      initialContent:`${window.article ? window.article.content : '请输入文章内容'}`
-      //isShow:true,
-    });
+    if(tabkey == 1) {
+      this.ue = UE.getEditor('ueditContainer',{
+        initialFrameHeight:'200',
+        autoHeightEnabled: false,
+        enableAutoSave:true,
+        initialContent:`${window.article ? window.article.content : '请输入文章内容'}`
+        //isShow:true,
+      });
+    }
   }
 
   componentWillUnmount() {
-    const {value} = this.state;
-    if(this.ue) {
+    const { tabkey } = this.state;
+    if(tabkey == 1) {
       this.ue.destroy();
     }
   }
@@ -266,7 +321,7 @@ class NewArticle extends React.Component{
     return(
       <Form onSubmit={this.handleSubmit} form={this.props.form}>
         <FormItem>
-          <Input required {...getFieldProps('title')} style={{height:'40px'}}  placeholder="输入文章标题" maxLength="50"/>{/*defaultValue={this.renderArticleName()} onChange={this.hangleTitleChange}*/}
+          <Input type="text" required {...getFieldProps('title')} style={{height:'40px'}} value={this.renderArticleName()} onChange={this.hangleTitleChange}  placeholder="输入文章标题"/>
         </FormItem>
           {this.renderPicture()}
         <FormItem style={{height:'300px'}}>
@@ -278,13 +333,15 @@ class NewArticle extends React.Component{
               </div>
             </TabPane>
             <TabPane tab="跳转链接" key="2" >
-              <Input type="textarea" type="url" {...getFieldProps('link')} defaultValue={window.article ? window.article : ''} placeholder="输入或粘贴链接"/>
+              <FormItem>
+                <Input  type="url" {...getFieldProps('link')} value={this.renderLink()} onChange={this.handleLinkChange} placeholder="输入或粘贴链接"/>
+              </FormItem>
             </TabPane>
           </Tabs>
         </FormItem>
         <FormItem >
           <label className="ant-checkbox-inline">
-            <Checkbox  {...getFieldProps('recommended')} />推荐
+            <Checkbox onChange={this.handleCheckChange} defaultChecked={this.renderCheckbox()} {...getFieldProps('recommended')} />推荐
           </label>
         </FormItem>
         <FormItem>
