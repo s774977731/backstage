@@ -102,7 +102,7 @@ class NewArticle extends React.Component{
         //}
       },
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         switch (err.status) {
           case 404:
             message.error('获取数据失败，请联系官方人员！');
@@ -131,14 +131,16 @@ class NewArticle extends React.Component{
     if(this.ue) {
       var content = this.ue.getContent();
     }
-    console.log('收到表单值：', this.props.form.getFieldsValue());
+    // console.log('收到表单值：', this.props.form.getFieldsValue());
     let formValue = this.props.form.getFieldsValue();
 
     publicParams.type = value;
     publicParams.content = content;
     publicParams.title = articleTitle;
-    publicParams.image_url = this.returnImg_url();
+    publicParams.image_url = this.returnImg_url();//this.returnImg_url()
     publicParams.url = articleLink;
+    publicParams.author_name = $('#author').val();
+    publicParams.source = $('#source').val();
     publicParams.recommended = Number(formValue.recommended) || 0;
     //publicParams.service = 'Admin.AddArticle';
       //更新文章
@@ -146,14 +148,16 @@ class NewArticle extends React.Component{
       publicParams.recommended = Number(formValue.recommended) || window.article.recommend;
       publicParams.url = articleLink || window.article.article_url;
       publicParams.title = articleTitle || window.article.article_title;
+      publicParams.author_name = $('#author').val() || window.article.author_name;
+      publicParams.source = $('#source').val() || window.article.source;
       publicParams.article_id = window.article.article_id;
       publicParams.service = 'Admin.UpdateArticle';
     }else {
       //添加文章
-      //if(!img_url) {
-      //  message.error('请上传图片');
-      //  return false;
-      //}
+      if(!img_url) {
+       message.error('请上传图片');
+       return false;
+      }
       publicParams.service = 'Admin.AddArticle';
     }
     console.log(publicParams);
@@ -166,15 +170,15 @@ class NewArticle extends React.Component{
     this.setState({ fileList });
 
     if (info.file.status !== 'uploading') {
-      console.log(info.file, info.fileList);
+      // console.log(info.file, info.fileList);
     }
     if (info.file.status === 'done') {
-      console.log(info.file.response.data.img_url);
+      // console.log(info.file.response.data.img_url);
       message.success(`${info.file.name} 上传成功。`);
       this.setState({
         img_url:info.file.response.data.img_url
       });
-      console.log('跟换后的图片地址'+this.state.img_url);
+      // console.log('跟换后的图片地址'+this.state.img_url);
     } else if (info.file.status === 'error') {
       message.error(`${info.file.name} 上传失败。`);
     }
@@ -203,6 +207,7 @@ class NewArticle extends React.Component{
     };
     return (
       <div className="clearfix">
+        <div>&nbsp;</div>
         <Upload {...props} fileList={this.state.fileList}>
           <Icon type="plus" />
           <div className="ant-upload-text">上传封面图</div>
@@ -223,26 +228,26 @@ class NewArticle extends React.Component{
 
 
   handleChange(key) {
-    console.log(key);
+    // console.log(key);
     this.setState({
       value:key
     })
   }
 
   hangleTitleChange(e) {
-    console.log(e.target.value);
+    // console.log(e.target.value);
     this.setState({articleTitle:e.target.value});
   }
 
   handleLinkChange(e) {
-    console.log(e.target.value);
+    // console.log(e.target.value);
     this.setState({
       articleLink:e.target.value
     })
   }
 
   handleCheckChange(e) {
-    console.log(e.target.checked);
+    // console.log(e.target.checked);
     var recommended;
     if(e.target.checked) {
       recommended = 1;
@@ -262,7 +267,7 @@ class NewArticle extends React.Component{
       }
       return window.article.article_title;
     }else {
-      return articleTitle
+        return articleTitle
     }
   }
 
@@ -289,9 +294,10 @@ class NewArticle extends React.Component{
   }
 
   componentWillMount() {
-    window.record = JSON.parse(sessionStorage.record);
-
-    window.comments = JSON.parse(sessionStorage.comments);
+    if(window.article) {
+      window.record = JSON.parse(sessionStorage.record);
+      window.comments = JSON.parse(sessionStorage.comments);
+    }
     this.renderDefaultKey()
   }
 
@@ -321,7 +327,9 @@ class NewArticle extends React.Component{
     return(
       <Form onSubmit={this.handleSubmit} form={this.props.form}>
         <FormItem>
-          <Input type="text" required {...getFieldProps('title')} style={{height:'40px'}} value={this.renderArticleName()} onChange={this.hangleTitleChange}  placeholder="输入文章标题"/>
+          <Input className='col-12' type="text" required {...getFieldProps('title')} style={{height:'40px'}} value={this.renderArticleName()} onChange={this.hangleTitleChange}  placeholder="输入文章标题"/>
+          <Input className='col-12' id='author' type="text" required defaultValue={window.article ? window.article.author_name : ''} style={{height:'40px',width:'50%'}} placeholder="输入文章作者"/>
+          <Input className='col-12' id='source' type="text" required defaultValue={window.article ? window.article.source : ''} style={{height:'40px',width:'50%'}} placeholder="输入文章来源"/>
         </FormItem>
           {this.renderPicture()}
         <FormItem style={{height:'300px'}}>

@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { Link } from 'react-router';
 import reqwest from 'reqwest';
 import md5 from 'md5';
@@ -22,7 +23,8 @@ import {
   Popover,
   Select,
   Popconfirm,
-  Spin
+  Spin,
+  Modal
 } from 'antd';
 
 //全局链接
@@ -46,7 +48,8 @@ class Authority extends React.Component{
       selectedRows: [],
       record :{},
       spin:true,
-      search:'title'
+      search:'title',
+      visible:false
     };
     this.handleConfirm = this.handleConfirm.bind(this);
     this.handleClick = this.handleClick.bind(this);
@@ -55,6 +58,9 @@ class Authority extends React.Component{
     this.getAdmins = this.getAdmins.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.changeSearch = this.changeSearch.bind(this);
+    this.showModal = this.showModal.bind(this);
+    this.handleOk = this.handleOk.bind(this);
+    this.handleCancelModal = this.handleCancelModal.bind(this);
   }
 
   columns() {
@@ -80,6 +86,8 @@ class Authority extends React.Component{
         className:'text-right',
         render: (text, record) =>
           <span>
+            <a><span onClick={this.showModal.bind(this, text,record)} href="javasript:;">修改密码</span></a>
+            <span className="ant-divider" />
             <Popconfirm
               title="确定要删除该管理员吗？"
               onConfirm={this.deleteClick.bind(this, record.id,record)}
@@ -118,10 +126,49 @@ class Authority extends React.Component{
     }
   }
 
+  showModal(text,record) {
+    // console.log(record);
+    this.admin_id = record.id;
+    this.setState({visible:true})
+  }
+
+  handleOk() {
+    this.setState({visible:false});
+    let newPass = ReactDOM.findDOMNode(this.refs.newPass).childNodes[0].value;
+    publicParams.admin_id = this.admin_id;
+    publicParams.password = newPass;
+    publicParams.service = 'Admin.ChangeAdminPassword';
+    reqwest({
+      url: publicUrl+'/?service=Admin.ChangeAdminPassword',
+      method: 'post',
+      data: publicParams,
+      type: 'jsonp',
+      withCredentials: true,
+      success: (result) => {
+      //  console.log(result.data)
+        message.success('修改密码成功');
+      },
+      error: (err) => {
+        // console.log(err);
+        switch (err.status) {
+          case 404:
+            message.error('获取数据失败，请联系官方人员！');
+            break;
+          default:
+            message.error('获取数据失败，请刷新重试！');
+            break;
+        }
+      }
+    })
+  }
+  handleCancelModal() {
+    this.setState({visible:false})
+  }
+
   handleClick(e) {
     e.preventDefault();
     var visibility = document.getElementById('handle-add-admin').style.visibility;
-    console.log(visibility);
+    // console.log(visibility);
     if(visibility == 'hidden'){
       document.getElementById('handle-add-admin').style.visibility = 'visible';
       document.getElementById('admin').innerHTML = '确认添加';
@@ -145,7 +192,7 @@ class Authority extends React.Component{
   }
 
   changeSearch(value) {
-    console.log(value);
+    // console.log(value);
     this.setState({
       search:value
     })
@@ -156,10 +203,10 @@ class Authority extends React.Component{
     e.preventDefault();
     this.props.form.validateFields((errors, values) => {
       if (!!errors) {
-        console.log('Errors in form!!!');
+        // console.log('Errors in form!!!');
         return;
       }
-      console.log(values.key);
+      // console.log(values.key);
       if(search == 'title') {
         publicParams.username = values.key;
         publicParams.service = 'Admin.SearchAdminByUsername';
@@ -178,7 +225,7 @@ class Authority extends React.Component{
             data:result.data.admins,
             total:result.data.total
           });
-          console.log(result.data,this.state.data);
+          // console.log(result.data,this.state.data);
         }
       });
     });
@@ -192,7 +239,7 @@ class Authority extends React.Component{
   }
 
   onSelectChange(selectedRowKeys,selectedRows) {
-    console.log(selectedRows);
+    // console.log(selectedRows);
     this.setState({ selectedRowKeys });
   }
 
@@ -208,7 +255,7 @@ class Authority extends React.Component{
       //请求删除多选的表单
       publicParams.service = 'Admin.DeleteAdmins';
       publicParams.admin_ids = getStats(selectedRows,'id');
-      console.log(getStats(selectedRows,'id'));
+      // console.log(getStats(selectedRows,'id'));
 
       reqwest({
         url: publicUrl,
@@ -229,7 +276,7 @@ class Authority extends React.Component{
 
         },
         error: (err) => {
-          console.log(err);
+          // console.log(err);
           this.setState({ loading: false });
           switch (err.status) {
             case 404:
@@ -260,9 +307,9 @@ class Authority extends React.Component{
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        console.log(admin_id);
+        // console.log(admin_id);
         if (result.data.code == 0) {
-          console.log('success');
+          // console.log('success');
           this.getAdmins();
           this.setState({
             data: data
@@ -292,14 +339,14 @@ class Authority extends React.Component{
       withCredentials: true,
       success: (result) => {
           if (result.data.admins) {
-            console.log(result.data.admins);
+            // console.log(result.data.admins);
             this.setState({
               spin:false,
               data:result.data.admins
             });
         }
         else {//添加管理员
-          console.log(result);
+          // console.log(result);
           this.getAdmins();
           if(result.data.code == 1) {
             message.error('用户名已经存在');
@@ -314,7 +361,7 @@ class Authority extends React.Component{
         }
       },
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         this.setState({ loading: false });
         switch (err.status) {
           case 404:
@@ -419,6 +466,14 @@ class Authority extends React.Component{
           </section>
         </article>
         <footer className="ant-video-footer" />
+        <Modal title="修改管理员密码"
+               width="350"
+               style={{fontFamily:'_GB2312 FangSong_GB2312'}}
+               visible={this.state.visible}
+               onOk={this.handleOk}
+               onCancel={this.handleCancelModal}>
+          <Input type="password" ref="newPass" placeholder="请输入新密码"/>
+        </Modal>
       </Spin>
     )
   }
@@ -426,4 +481,3 @@ class Authority extends React.Component{
 
 Authority = Form.create()(Authority);
 export default Authority;
-

@@ -1,17 +1,20 @@
 import React, { Component } from 'react';
+import ReactDOM from  'react-dom';
 import { Link } from 'react-router';
 import reqwest from 'reqwest';
 import md5 from 'md5';
 import {
   DatePicker,
   Button,
-  Model,
+  Modal,
   Cascader,
   Breadcrumb,
   Menu,
   Icon,
   Row,
-  Col
+  Col,
+  Input,
+  message
 } from 'antd';
 const SubMenu = Menu.SubMenu;
 
@@ -23,8 +26,8 @@ var publicParams = {};
 publicParams.app = 1;
 publicParams.t = timestamp;
 publicParams.sign=md5(timestamp+'lowkey');
- //publicParams.user_id=64;
- //publicParams.token='3315cfc6b45b0c722b091dd8224bad46';
+ // publicParams.user_id=64;
+ // publicParams.token='eab6f990928cdb0184e86343f13a07f8';
 publicParams.user_id = sessionStorage.user_id;
 publicParams.token = sessionStorage.token;
 
@@ -38,9 +41,13 @@ class App extends Component {
     super();
     this.state = {
       Authority:false,
-      data:'数据中心'
+      data:'数据中心',
+      visible:false
     };
     this.handleClick = this.handleClick.bind(this);
+    this.modifySupPassword = this.modifySupPassword.bind(this);
+    this.handleOk = this.handleOk.bind(this);
+    this.handleCancle = this.handleCancle.bind(this);
   }
 
   handleClick(e) {
@@ -62,7 +69,7 @@ class App extends Component {
             break;
     }
     //全局的key
-    console.log(window.key);
+    // console.log(window.key);
   }
 
   handleLogout() {
@@ -74,12 +81,48 @@ class App extends Component {
       type: 'json',
       withCredentials: true,
       success: (result) => {
-        console.log(result.data);
+        // console.log(result.data);
         if(result.data.code == 0) {
           window.location.href = '../index.html'
         }
       }
     });
+  }
+
+  modifySupPassword() {
+    this.setState({visible:true})
+  }
+  handleOk() {
+    this.setState({visible:false});
+    let newPass = ReactDOM.findDOMNode(this.refs.newPass).childNodes[0].value;
+    publicParams.new_pwd = newPass;
+    publicParams.service = 'Admin.ChangeSelfPassword';
+    reqwest({
+      url: publicUrl+'/?service=Admin.ChangeSelfPassword',
+      method: 'post',
+      data: publicParams,
+      type: 'jsonp',
+      withCredentials: true,
+      success: (result) => {
+        // console.log(result.data)
+        message.success('修改密码成功');
+      },
+      error: (err) => {
+        // console.log(err);
+        switch (err.status) {
+          case 404:
+            message.error('获取数据失败，请联系官方人员！');
+            break;
+          default:
+            message.error('获取数据失败，请刷新重试！');
+            break;
+        }
+      }
+    })
+  }
+
+  handleCancle() {
+    this.setState({visible:false})
   }
 
   componentWillMount() {
@@ -153,7 +196,7 @@ class App extends Component {
              <Breadcrumb.Item>{[children.props.children.props.route.name]}</Breadcrumb.Item>
              </Breadcrumb>
              </div>*/}
-            <div onClick={this.handleLogout} style={{float:'right',marginRight:'20px',cursor:'pointer'}}>admin | 退出 </div>
+            <div style={{float:'right',marginRight:'20px',cursor:'pointer'}}><span onClick={this.modifySupPassword}>{sessionStorage.username || 'admin'} </span>| <span onClick={this.handleLogout}>退出</span> </div>
           </div>
           <div className="ant-layout-container">
             <div className="ant-layout-content">
@@ -161,6 +204,14 @@ class App extends Component {
             </div>
           </div>
         </div>
+        <Modal title="修改超级管理员密码"
+               width="350"
+               style={{fontFamily:'_GB2312 FangSong_GB2312'}}
+               visible={this.state.visible}
+               onOk={this.handleOk}
+               onCancel={this.handleCancle}>
+          <Input type="password" ref="newPass" placeholder="请输入新密码"/>
+        </Modal>
       </article>
     );
   }

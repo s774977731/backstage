@@ -145,10 +145,10 @@ class NewLiveRoom extends React.Component{
     this.setState({ fileList });
 
     if (info.file.status !== 'uploading') {
-      console.log(info.file, info.fileList);
+      // console.log(info.file, info.fileList);
     }
     if (info.file.status === 'done') {
-      console.log(info.file.response.data.img_url);
+      // console.log(info.file.response.data.img_url);
       message.success(`${info.file.name} 上传成功。`);
       this.setState({
         img_url:info.file.response.data.img_url
@@ -198,7 +198,7 @@ class NewLiveRoom extends React.Component{
   handletitlesChange(recode,value) {
     this.change = true;
     recode.view_code = value;
-    console.log(value);
+    // console.log(value);
     var views;
     if(window.video) {
       views = window.video.views;
@@ -302,7 +302,7 @@ class NewLiveRoom extends React.Component{
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        console.log(result);
+        // console.log(result);
         if(!window.video.id) {
           if(result.data.code == 0) {
             message.success('房间创建成功');
@@ -321,7 +321,7 @@ class NewLiveRoom extends React.Component{
         }else {
           if(result.data.code == 0) {
             message.success('房间更新成功');
-            console.log(publicParams);
+            // console.log(publicParams);
             setTimeout(function () {
               window.location.href = '#/video/main'
             },1000)
@@ -335,7 +335,7 @@ class NewLiveRoom extends React.Component{
         }
       },
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         this.setState({ loading: false });
         switch (err.status) {
           case 404:
@@ -390,7 +390,7 @@ class NewLiveRoom extends React.Component{
       success: (result) => {
         console.log(result);
         if (result.data.code == 0) {
-          console.log('success');
+          // console.log('success');
           this.getTableRight();
           //this.setState({
           //  data: data
@@ -436,7 +436,7 @@ class NewLiveRoom extends React.Component{
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        console.log(result.data);
+        // console.log(result.data);
         if(result.data.code == 0) {
           message.success('授予该用户直播权限成功');
           this.getTableRight();
@@ -447,7 +447,7 @@ class NewLiveRoom extends React.Component{
         }
       },
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         this.setState({ loading: false });
         switch (err.status) {
           case 404:
@@ -520,7 +520,7 @@ class NewLiveRoom extends React.Component{
 
       },
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         this.setState({ loading: false });
         switch (err.status) {
           case 404:
@@ -561,7 +561,7 @@ class NewLiveRoom extends React.Component{
         message.success('操作成功');
 
       }, 500);
-      console.log(this.state.selectedRows);
+      // console.log(this.state.selectedRows);
     }else{
       message.info("请至少选择一项")
     }
@@ -576,7 +576,7 @@ class NewLiveRoom extends React.Component{
       record,
       selection:true
     });
-    console.log(selectedRows);
+    // console.log(selectedRows);
   }
 
   onSelectAll() {
@@ -588,7 +588,7 @@ class NewLiveRoom extends React.Component{
       message.info('最多选4个');
       return false;
     } else {
-      console.log('selectedRowKeys changed: ', selectedRowKeys);
+      // console.log('selectedRowKeys changed: ', selectedRowKeys);
       this.setState({ selectedRowKeys });
       sessionStorage.selectedRowKeys = JSON.stringify(selectedRowKeys);
     }
@@ -606,13 +606,15 @@ class NewLiveRoom extends React.Component{
 
 
   componentWillMount() {
-    window.videoId = JSON.parse(sessionStorage.videoId);
-    window.video = JSON.parse(sessionStorage.video);
-    window.record = JSON.parse(sessionStorage.record);
+    if(window.video) {
+      window.videoId = JSON.parse(sessionStorage.videoId);
+      window.video = JSON.parse(sessionStorage.video);
+      window.record = JSON.parse(sessionStorage.record);
+    }
     this.getTableRight();
   }
   componentDidMount() {
-    console.log(window.video)
+    // console.log(window.video)
   }
 
   render() {

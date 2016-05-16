@@ -86,7 +86,7 @@ class DataCenter extends React.Component{
         let num = transform(result.data.num).pop();
         let totalTitles = getKeys(result.data.num);
         let totalNumber = getValus(result.data.num);
-        console.log(result.data);
+        // console.log(result.data);
         this.setState({
           totalNew:num,
           totalTitles:totalTitles,
@@ -94,7 +94,7 @@ class DataCenter extends React.Component{
         });
       },
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         this.setState({
 
         });
@@ -104,7 +104,7 @@ class DataCenter extends React.Component{
   }
 
   handleTotalChange(e) {
-    console.log(e);
+    // console.log(e);
     publicParams.service = 'Admin.GetCumulativeUserNum';
     publicParams.day = e ? e.target.value : 3;
     this.fetch()
@@ -119,7 +119,7 @@ class DataCenter extends React.Component{
       data: publicParams,
       type: 'jsonp',
       success: (result) => {
-        console.log(result.data.num);
+        // console.log(result.data.num);
         let newNum = transform(result.data.num).pop();
         let newTitles = Object.keys(result.data.num);
         let newNumber = transform(result.data.num);
@@ -130,7 +130,7 @@ class DataCenter extends React.Component{
         });
       },
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         this.setState({
 
         });
@@ -156,11 +156,11 @@ class DataCenter extends React.Component{
           activeTitles:activeTitles,
           activeNumber:activeNumber
         });
-        console.log(this.state.activeTitles,this.state.activeNumber);
+        // console.log(this.state.activeTitles,this.state.activeNumber);
       },
 
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         this.setState({
 
         });

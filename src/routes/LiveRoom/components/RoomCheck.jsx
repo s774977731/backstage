@@ -24,7 +24,7 @@ let publicParams = JSON.parse(publicParamsJSON);
 let publicUrl = sessionStorage.publicUrl;
 
 window.deleteRoomComment = function (i) {
-  console.log(window.roomCheck[i]);
+  // console.log(window.roomCheck[i]);
   publicParams.service = 'Admin.DeleteRoomContent';
   publicParams.content_id = window.roomCheck[i].id;
   reqwest({
@@ -34,14 +34,14 @@ window.deleteRoomComment = function (i) {
     type: 'jsonp',
     withCredentials: true,
     success: (result) => {
-      console.log(result);
+      // console.log(result);
       if(result.data.code == 0) {
         message.success('删除直播内容成功');
         $(`#x${i}`).fadeOut();
       }
     },
     error: (err) => {
-      console.log(err);
+      // console.log(err);
       switch (err.status) {
         case 404:
           message.error('获取数据失败，请联系官方人员！');
@@ -134,7 +134,7 @@ class VideoCheck extends React.Component{
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        console.log(result.data);
+        // console.log(result.data);
         if(result.data.code == 0) {
           this.setState({
             data:result.data.hosts
@@ -142,7 +142,7 @@ class VideoCheck extends React.Component{
         }
       },
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         this.setState({ loading: false });
         switch (err.status) {
           case 404:
@@ -186,7 +186,7 @@ class VideoCheck extends React.Component{
         this.getRoomHosts();
       },
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         this.setState({ loading: false });
         switch (err.status) {
           case 404:
@@ -239,7 +239,7 @@ class VideoCheck extends React.Component{
   }
 
   DEableRoomHost(record) {
-    console.log(record);
+    // console.log(record);
     if(record.audit == 0) {
       publicParams.service = 'Admin.DisableRoomHost';
     }else {
@@ -265,7 +265,7 @@ class VideoCheck extends React.Component{
         type: 'jsonp',
         withCredentials: true,
         success: (result) => {
-          console.log(result.data);
+          // console.log(result.data);
           if(result.data.code == 0) {
             message.success('操作成功');
             window.location.href = '#/room/main';
@@ -274,7 +274,7 @@ class VideoCheck extends React.Component{
           }
         },
         error: (err) => {
-          console.log(err);
+          // console.log(err);
           this.setState({ loading: false });
           switch (err.status) {
             case 404:
@@ -293,7 +293,7 @@ class VideoCheck extends React.Component{
     window.record = JSON.parse(sessionStorage.record);
     window.roomCheck = JSON.parse(sessionStorage.roomCheck);
     window.comments = JSON.parse(sessionStorage.comments);
-    console.log(window.roomCheck)
+    // console.log(window.roomCheck)
   }
 
   render() {
@@ -331,4 +331,3 @@ class VideoCheck extends React.Component{
 }
 
 export default VideoCheck;
-

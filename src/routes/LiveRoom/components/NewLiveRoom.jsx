@@ -156,7 +156,7 @@ class NewLiveRoom extends React.Component{
       //console.log(info.file, info.fileList);
     }
     if (info.file.status === 'done') {
-      console.log(info.file.response.data.img_url);
+      // console.log(info.file.response.data.img_url);
       message.success(`${info.file.name} 上传成功。`);
       this.setState({
         pic_is_change:true,
@@ -221,7 +221,7 @@ class NewLiveRoom extends React.Component{
 
 
 
-    console.log(recode);
+    // console.log(recode);
   }
 
   handleCreateUpdateRoom() {
@@ -570,7 +570,7 @@ class NewLiveRoom extends React.Component{
         record,
         selection:true
       });
-      console.log(selectedRows);
+      // console.log(selectedRows);
   }
 
   onSelectAll(selected, selectedRows, changeRows) {
@@ -580,7 +580,7 @@ class NewLiveRoom extends React.Component{
   }
 
   onSelectChange(selectedRowKeys) {
-        console.log('selectedRowKeys changed: ', selectedRowKeys);
+        // console.log('selectedRowKeys changed: ', selectedRowKeys);
         this.setState({ selectedRowKeys });
         sessionStorage.selectedRowKeys = JSON.stringify(selectedRowKeys);
   }
@@ -596,9 +596,12 @@ class NewLiveRoom extends React.Component{
 
 
   componentWillMount() {
-    window.room = JSON.parse(sessionStorage.room);
-    window.roomId = JSON.parse(sessionStorage.roomId);
-    window.record = JSON.parse(sessionStorage.record);
+    // if(window.room !== false) {
+    //   window.room = JSON.parse(sessionStorage.room);
+    //   window.roomId = JSON.parse(sessionStorage.roomId);
+    //   window.record = JSON.parse(sessionStorage.record);
+    //   alert('1111')
+    // }
     this.getTableRight();
   }
   //componentDidMount() {

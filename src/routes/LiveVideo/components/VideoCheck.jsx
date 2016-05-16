@@ -15,8 +15,10 @@ import {
   Menu,
   Table,
   message,
-  Tag
+  Tag,
+  Select
 } from 'antd';
+const Option = Select.Option;
 //全局链接
 let publicParamsJSON = sessionStorage.publicParams;
 let publicParams = JSON.parse(publicParamsJSON);
@@ -51,6 +53,9 @@ class VideoCheck extends React.Component{
   }
   componentWillMount() {
     //var code = getStats(window.videoCheck,'view_code');
+    window.record = JSON.parse(sessionStorage.record);
+    window.videoCheck = JSON.parse(sessionStorage.videoCheck);
+    window.comments = JSON.parse(sessionStorage.comments);
     if(window.videoCheck) {
       for(var i=0;i<window.videoCheck.length;i++) {
         if(window.videoCheck[i].view_code == 1 && window.videoCheck[i].session_status == 0) {
@@ -72,15 +77,13 @@ class VideoCheck extends React.Component{
         }
       }
     }
-    window.record = JSON.parse(sessionStorage.record);
-    window.videoCheck = JSON.parse(sessionStorage.videoCheck);
-    window.comments = JSON.parse(sessionStorage.comments);
   }
 
 
   componentDidMount() {
-    console.log(window.videoCheck,window.record);
+    console.log(window.videoCheck,window.record,111);
     var video = window.videoCheck;
+    this.playUrl1 = [];this.playUrl2 = [];this.playUrl3 = [];this.playUrl4 = [];
     for(let i=0;i<video.length;i++) {
       if(video[i].session_status == 0) {
         switch (Number(video[i].view_code)) {
@@ -99,9 +102,10 @@ class VideoCheck extends React.Component{
         }
       } else {
         let playList = video[i].play_list;
-        this.playUrl1 = this.playUrl2 = this.playUrl3 = this.playUrl4 = [];
         for(let j=0;j<playList.length;j++) {
-         let playListUrl = {file:playList[j].play_url};
+         let playListUrl = {file:playList[j].play_url} ;
+
+        //  console.log(playListUrl);
           switch (Number(video[i].view_code)) {
             case 1:
               this.playUrl1.push(playListUrl);
@@ -118,65 +122,73 @@ class VideoCheck extends React.Component{
           }
         }
       }
-
+      console.log(this.playUrl1,this.playUrl2,this.playUrl3,this.playUrl4);
     }
-    console.log(this.playUrl1);
-    window.player1 = cyberplayer("playercontainer1").setup({
+    if(this.playUrl1[0]) {
+      window.player1 = cyberplayer("playercontainer1").setup({
+          width: 250,
+          height: 250,
+          stretching: "uniform",
+          //file: 'http://multimedia.bj.bcebos.com/media/motorOutput.mp4',
+          // http://multimedia.bj.bcebos.com/media/motorOutput.mp4
+          playlist: this.playUrl1,
+          autostart: true,
+          repeat: false,
+          volume: 100,
+          controls: 'none',
+          ak: '68b56a90481847a4b321f6d393e74c01' // 公有云平台注册即可获得accessKey
+        });
+    }
+
+    if(this.playUrl2[0]) {
+      window.player2 = cyberplayer("playercontainer2").setup({
         width: 250,
         height: 250,
         stretching: "uniform",
-        //file: 'http://multimedia.bj.bcebos.com/media/motorOutput.mp4',
-        // http://multimedia.bj.bcebos.com/media/motorOutput.mp4
-        playlist: this.playUrl1,
+        playlist: this.playUrl2,
+        autostart: true,
+        repeat: true,
+        volume: 100,
+        controls: 'none',
+        ak: '68b56a90481847a4b321f6d393e74c01' // 公有云平台注册即可获得accessKey
+      });
+    }
+    if(this.playUrl3[0]) {
+      window.player3 = cyberplayer("playercontainer3").setup({
+        width: 250,
+        height: 250,
+        stretching: "uniform",
+        playlist: this.playUrl3,
         autostart: true,
         repeat: false,
         volume: 100,
         controls: 'none',
         ak: '68b56a90481847a4b321f6d393e74c01' // 公有云平台注册即可获得accessKey
       });
-    window.player2 = cyberplayer("playercontainer2").setup({
-      width: 250,
-      height: 250,
-      stretching: "uniform",
-      file: this.playUrl2 || [],
-      autostart: true,
-      repeat: true,
-      volume: 100,
-      controls: 'none',
-      ak: '68b56a90481847a4b321f6d393e74c01' // 公有云平台注册即可获得accessKey
-    });
-    window.player3 = cyberplayer("playercontainer3").setup({
-      width: 250,
-      height: 250,
-      stretching: "uniform",
-      file: this.playUrl3,
-      autostart: true,
-      repeat: false,
-      volume: 100,
-      controls: 'none',
-      ak: '68b56a90481847a4b321f6d393e74c01' // 公有云平台注册即可获得accessKey
-    });
-    window.player4 = cyberplayer("playercontainer4").setup({
-      width: 250,
-      height: 250,
-      stretching: "uniform",
-      file: this.playUrl4,
-      autostart: true,
-      repeat: false,
-      volume: 100,
-      controls: 'none',
-      ak: '68b56a90481847a4b321f6d393e74c01' // 公有云平台注册即可获得accessKey
-    });
+    }
+    if(this.playUrl4[0]) {
+      window.player4 = cyberplayer("playercontainer4").setup({
+        width: 250,
+        height: 250,
+        stretching: "uniform",
+        playlist: this.playUrl4,
+        autostart: true,
+        repeat: false,
+        volume: 100,
+        controls: 'none',
+        ak: '68b56a90481847a4b321f6d393e74c01' // 公有云平台注册即可获得accessKey
+      });
+    }
   }
 
   code1() {
     publicParams.view_code = 1;
     publicParams.sjcode = 1;
     if(this.state.pause1) {
-      console.log(111);
+      // console.log(111);
       publicParams.service = 'Admin.StopVideoView'
     }else {
-      console.log(222);
+      // console.log(222);
       publicParams.service = 'Admin.DeleteVideoView'
     }
     this.stopDeleteOneView();
@@ -225,7 +237,7 @@ class VideoCheck extends React.Component{
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        console.log(result);
+        // console.log(result);
         if(result.data.code == 0) {
           message.success('操作成功');
           if(publicParams.sjcode == 1) {
@@ -299,7 +311,7 @@ class VideoCheck extends React.Component{
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        console.log(result);
+        // console.log(result);
         if(result.data.code == 0) {
           message.success('操作成功');
           window.location.href = '#/video/main'
@@ -352,6 +364,22 @@ class VideoCheck extends React.Component{
   //    }
   //  });
   //}
+  onChange(e) {
+    console.log(e);
+    publicParams.video_id = window.videoCheck.cid;
+    publicParams.view_code = e;
+    publicParams.service = 'Admin.SetDefaultView';
+    reqwest({
+       url: publicUrl,
+       method: 'get',
+       data: publicParams,
+       type: 'jsonp',
+       withCredentials: true,
+       success: (result) => {
+         console.log(result.data);
+       }
+     });
+  }
 
   render() {
     return(
@@ -361,6 +389,19 @@ class VideoCheck extends React.Component{
               {window.record.delete ? '删除直播' : '结束直播'}
             </Button>
             <span style={{marginLeft:'3rem',fontSize:'1.5rem'}}>{window.record.name}</span>
+            <Select
+              style={{ width: 100,float:'right'}}
+              placeholder="请选择默认视角"
+              optionFilterProp="children"
+              notFoundContent="无法找到"
+              onChange={this.onChange}>
+              <Option value="0">视角一</Option>
+              <Option value="1">视角二</Option>
+              <Option value="2">视角三</Option>
+              <Option value="3">视角四</Option>
+            </Select>
+            <span style={{marginRight:'1rem',fontSize:'1.5rem',float:'right',paddingTop:'5px'}}>请选择默认视角:</span>
+
         </header>
         <Row>
           <div style={{minWidth:'550px',maxWidth:'600px',float:'left'}}>
@@ -425,4 +466,3 @@ class VideoCheck extends React.Component{
 
 VideoCheck = Form.create()(VideoCheck);
 export default VideoCheck;
-

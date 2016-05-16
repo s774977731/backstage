@@ -31,15 +31,15 @@ class DetailArticle extends React.Component{
   renderContent() {
     if(window.article) {
       var content;
-      if(window.article.type == 1) {
-         content = window.article.content;
-        return { __html: content }
-      }else {
+      // if(window.article.type == 1) {
+      //    content = window.article.content;
+      //   return { __html: content }
+      // }else {
          content = window.article.article_url;
-        console.log(content);
+        // console.log(content);
         //return { __html: `<a href=${content} target="_blank"><p>${content}</p></a>` }
         return { __html: `<iframe src=${content} frameborder="0" style="width: 100%;height: 570px"></iframe>` }
-      }
+      // }
 
     }else {
       return  {__html: `<div><br/><p>没有文章详情</p></div>`}
@@ -80,4 +80,3 @@ class DetailArticle extends React.Component{
 }
 
 export default DetailArticle;
-

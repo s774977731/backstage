@@ -141,7 +141,7 @@ class Article extends React.Component {
         },700)
       },
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         this.setState({ loading: false });
         switch (err.status) {
           case 404:
@@ -157,7 +157,7 @@ class Article extends React.Component {
 
 
   onSelectChange(selectedRowKeys) {
-    console.log('selectedRowKeys changed: ', selectedRowKeys);
+    // console.log('selectedRowKeys changed: ', selectedRowKeys);
     this.setState({selectedRowKeys});
   }
 
@@ -168,7 +168,7 @@ class Article extends React.Component {
       //请求删除多选的表单
       publicParams.service = 'Admin.DeleteArticles';
       publicParams.article_ids = getStats(selectedRows,'article_id');
-      console.log(getStats(selectedRows,'article_id'));
+      // console.log(getStats(selectedRows,'article_id'));
       reqwest({
         url: publicUrl,
         method: 'get',
@@ -194,7 +194,7 @@ class Article extends React.Component {
           }
         },
         error: (err) => {
-          console.log(err);
+          // console.log(err);
           this.setState({ loading: false });
           switch (err.status) {
             case 404:
@@ -223,7 +223,7 @@ class Article extends React.Component {
     publicParams.id = article_id;
     this.fetch();
     window.record = record;
-    console.log(record);
+    // console.log(record);
   }
 
   modifyArticle(article_id,record) {
@@ -262,7 +262,7 @@ class Article extends React.Component {
       }
     });
     window.record = record;
-    console.log(record);
+    // console.log(record);
   }
 
   //前后端请求删除
@@ -279,12 +279,12 @@ class Article extends React.Component {
       withCredentials: true,
       success: (result) => {
         if (result.data.code == 0) {
-          console.log('success');
+          // console.log('success');
           this.getArticles();
           this.setState({
             data: data
           });
-          message.success('您已删除该评论');
+          message.success('删除文章成功');
         }
       },
       error: (err) => {
@@ -301,7 +301,7 @@ class Article extends React.Component {
   }
 
   changeSearch(value) {
-    console.log(value);
+    // console.log(value);
     this.setState({
       search:value
     })
@@ -312,10 +312,10 @@ class Article extends React.Component {
     e.preventDefault();
     this.props.form.validateFields((errors, values) => {
       if (!!errors) {
-        console.log('Errors in form!!!');
+        // console.log('Errors in form!!!');
         return;
       }
-      console.log(values.key);
+      // console.log(values.key);
       if(search == 'title') {
         publicParams.article_title = values.key;
         publicParams.service = 'Admin.SearchArticleByTitle';
@@ -334,7 +334,7 @@ class Article extends React.Component {
               data:result.data.articles,
               total:result.data.total
             });
-          console.log(result.data);
+          // console.log(result.data);
         }
       });
     });
@@ -353,16 +353,15 @@ class Article extends React.Component {
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
+        this.setState({spin:false})
         if (result.data.articles) {
           this.setState({
-            spin:false,
             data:result.data.articles
           });
-          console.log(this.state.data);
+          // console.log(this.state.data);
         }
         if (result.data.num) {
           this.setState({
-            spin:false,
             total:result.data.num
           });
         }
@@ -378,8 +377,8 @@ class Article extends React.Component {
         }
       },
       error: (err) => {
-        console.log(err);
-        this.setState({ loading: false });
+        // console.log(err);
+        this.setState({ spin: false });
         switch (err.status) {
           case 404:
             message.error('获取数据失败，请联系官方人员！');
@@ -403,7 +402,7 @@ class Article extends React.Component {
       selectedRows,
       record
     });
-    console.log(selectedRows);
+    // console.log(selectedRows);
   }
 
   onSelectAll(selected, selectedRows, changeRows) {
@@ -413,7 +412,7 @@ class Article extends React.Component {
   }
 
   handleChange(current) {
-    console.log(current);
+    // console.log(current);
     publicParams.page = current;
     window.articlePage = current;
     this.getArticles()

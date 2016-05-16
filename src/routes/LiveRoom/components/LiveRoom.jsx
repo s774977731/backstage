@@ -122,7 +122,7 @@ class LiveRoom extends React.Component{
   }
 
   recommend(record,id) {
-    console.log(record.recommend);
+    // console.log(record.recommend);
     if(record.recommend == 1) {
       publicParams.service = 'Admin.Unrecommend';
     }else {
@@ -153,7 +153,7 @@ class LiveRoom extends React.Component{
         },700)
       },
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         this.setState({ loading: false });
         switch (err.status) {
           case 404:
@@ -168,7 +168,7 @@ class LiveRoom extends React.Component{
   }
 
   changeSearch(value) {
-    console.log(value);
+    // console.log(value);
     this.setState({
       search:value
     })
@@ -179,10 +179,10 @@ class LiveRoom extends React.Component{
     e.preventDefault();
     this.props.form.validateFields((errors, values) => {
       if (!!errors) {
-        console.log('Errors in form!!!');
+        // console.log('Errors in form!!!');
         return;
       }
-      console.log(values.key);
+      // console.log(values.key);
       if(search == 'title') {
         publicParams.room_title = values.key;
         publicParams.service = 'Admin.SearchRoomByTitle';
@@ -201,7 +201,7 @@ class LiveRoom extends React.Component{
             data:result.data.rooms,
             total:result.data.total
           });
-          console.log(result.data);
+          // console.log(result.data);
         }
       });
     });
@@ -240,7 +240,7 @@ class LiveRoom extends React.Component{
             spin:false,
             data:result.data.rooms
           });
-          console.log(result.data.rooms);
+          // console.log(result.data.rooms);
         }
         if (result.data.num) {
             this.setState({
@@ -265,7 +265,7 @@ class LiveRoom extends React.Component{
 
       },
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         this.setState({ loading: false });
         switch (err.status) {
           case 404:
@@ -285,7 +285,7 @@ class LiveRoom extends React.Component{
   }
 
   handleChange(current) {
-    console.log(current);
+    // console.log(current);
     publicParams.page = current;
     window.liveRoomPage = current;
     this.getRooms()
@@ -369,4 +369,3 @@ class LiveRoom extends React.Component{
 
 LiveRoom = Form.create()(LiveRoom);
 export default LiveRoom;
-

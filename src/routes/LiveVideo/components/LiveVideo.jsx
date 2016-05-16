@@ -121,7 +121,7 @@ class LiveVideo extends React.Component{
   }
 
   recommend(record,id) {
-    console.log(record.recommend);
+    // console.log(record.recommend);
     if(record.recommend == 1) {
       publicParams.service = 'Admin.Unrecommend';
     }else {
@@ -136,7 +136,7 @@ class LiveVideo extends React.Component{
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        console.log(result);
+        // console.log(result);
         this.getVideos();
         setTimeout(function () {
           if(record.recommend == 0) {
@@ -152,7 +152,7 @@ class LiveVideo extends React.Component{
         },700)
       },
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         this.setState({ loading: false });
         switch (err.status) {
           case 404:
@@ -167,7 +167,7 @@ class LiveVideo extends React.Component{
   }
 
   changeSearch(value) {
-    console.log(value);
+    // console.log(value);
     this.setState({
       search:value
     })
@@ -178,10 +178,10 @@ class LiveVideo extends React.Component{
     e.preventDefault();
     this.props.form.validateFields((errors, values) => {
       if (!!errors) {
-        console.log('Errors in form!!!');
+        // console.log('Errors in form!!!');
         return;
       }
-      console.log(values.key);
+      // console.log(values.key);
       if(search == 'title') {
         publicParams.video_title = values.key;
         publicParams.service = 'Admin.SearchVideoByTitle';
@@ -200,7 +200,7 @@ class LiveVideo extends React.Component{
             data:result.data.videos,
             total:result.data.total
           });
-          console.log(result.data);
+          // console.log(result.data);
         }
       });
     });
@@ -237,7 +237,7 @@ class LiveVideo extends React.Component{
       withCredentials: true,
       success: (result) => {
         if (result.data.videos) {
-          console.log(result.data.videos);
+          // console.log(result.data.videos);
           this.setState({
             spin:false,
             data:result.data.videos
@@ -269,7 +269,7 @@ class LiveVideo extends React.Component{
         }
       },
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         this.setState({ loading: false });
         switch (err.status) {
           case 404:
@@ -289,7 +289,7 @@ class LiveVideo extends React.Component{
   }
 
   handleChange(current) {
-    console.log(current);
+    // console.log(current);
     publicParams.page = current;
     window.liveVideoPage = current;
     this.getVideos()
@@ -373,4 +373,3 @@ class LiveVideo extends React.Component{
 
 LiveVideo = Form.create()(LiveVideo);
 export default LiveVideo;
-
