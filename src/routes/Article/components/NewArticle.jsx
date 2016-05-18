@@ -70,7 +70,7 @@ class NewArticle extends React.Component{
       url: publicUrl+'/?service=Admin.AddArticle',
       method: 'post',
       data: publicParams,
-      type: 'jsonp',
+      type: 'json',
       withCredentials: true,
       success: (result) => {
         console.log(result);
@@ -178,7 +178,7 @@ class NewArticle extends React.Component{
       this.setState({
         img_url:info.file.response.data.img_url
       });
-      // console.log('跟换后的图片地址'+this.state.img_url);
+      console.log('跟换后的图片地址'+this.state.img_url);
     } else if (info.file.status === 'error') {
       message.error(`${info.file.name} 上传失败。`);
     }

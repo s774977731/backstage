@@ -76,17 +76,20 @@ class VideoCheck extends React.Component{
   constructor() {
     super();
     this.state = {
-      visible:false
+      visible:false,
+      conList:window.roomCheck
     };
     this.renderModal = this.renderModal.bind(this);
     this.handleOk = this.handleOk.bind(this);
     this.handleCancel = this.handleCancel.bind(this);
     this.fetch = this.fetch.bind(this);
     this.getRoomHosts = this.getRoomHosts.bind(this);
+    this.handleScroll = this.handleScroll.bind(this);
   }
 
   renderComments() {
     const contentList = window.roomCheck;
+    // console.log(this.state.conList,contentList)
     var comments = '';
     if(window.roomCheck) {
       //对某用户禁言
@@ -289,11 +292,39 @@ class VideoCheck extends React.Component{
     }
   }
 
+  handleScroll(e) {
+    let scrollTop = $('.video-check-right').scrollTop();
+    let divHeight = $('.video-check-right').width();
+    let lastHeight = $('.comments').last().height()*3;
+    // console.log(this.lastContent)
+
+    if(scrollTop > divHeight+lastHeight) {
+      publicParams.size = 20;
+      publicParams.room_id = window.record.id;
+      publicParams.from_id = '';
+      publicParams.to_id = this.lastContent.id;
+      publicParams.service = 'Admin.GetRoomContent';
+      reqwest({
+        url: publicUrl,
+        method: 'get',
+        data: publicParams,
+        type: 'jsonp',
+        withCredentials: true,
+        success: (result) => {
+          var content = result.data.content;
+          window.roomCheck = window.roomCheck.concat(content);
+          console.log(window.roomCheck);
+        }
+      })
+    }
+  }
+
   componentWillMount() {
-    window.record = JSON.parse(sessionStorage.record);
-    window.roomCheck = JSON.parse(sessionStorage.roomCheck);
-    window.comments = JSON.parse(sessionStorage.comments);
-    // console.log(window.roomCheck)
+      window.record = JSON.parse(sessionStorage.record);
+      window.roomCheck = JSON.parse(sessionStorage.roomCheck);
+      window.comments = JSON.parse(sessionStorage.comments);
+      this.lastContent =  window.roomCheck.pop();
+
   }
 
   render() {
@@ -317,7 +348,7 @@ class VideoCheck extends React.Component{
           <Col span="11">
             <h2>直播列表</h2>
             <br/>
-            <div className=" video-check-right" style={{overflow:'auto'}}>
+            <div className="video-check-right" id='demo' onScroll={this.handleScroll} style={{overflow:'auto'}}>
               <div dangerouslySetInnerHTML={this.renderComments()} />
             </div>
           </Col>

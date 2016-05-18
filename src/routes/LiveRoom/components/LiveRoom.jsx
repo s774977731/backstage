@@ -235,6 +235,7 @@ class LiveRoom extends React.Component{
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
+        console.log(result)
         if (result.data.rooms) {
           this.setState({
             spin:false,
@@ -255,6 +256,7 @@ class LiveRoom extends React.Component{
         //获取直播间的直播内容
         if(result.data.content) {
           window.roomCheck = result.data.content;
+
           window.location.href = '#/room/room-check'
         }
         //获取评论列表

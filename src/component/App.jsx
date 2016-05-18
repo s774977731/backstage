@@ -27,7 +27,7 @@ publicParams.app = 1;
 publicParams.t = timestamp;
 publicParams.sign=md5(timestamp+'lowkey');
  // publicParams.user_id=64;
- // publicParams.token='eab6f990928cdb0184e86343f13a07f8';
+ // publicParams.token='87d98cc75ed4145a1f3eeb05fb7f0d77';
 publicParams.user_id = sessionStorage.user_id;
 publicParams.token = sessionStorage.token;
 
@@ -64,8 +64,11 @@ class App extends Component {
       case 'room':
         window.key = 4;
             break;
-      case 'authority-center':
+      case 'other':
         window.key = 5;
+            break;
+      case 'authority-center':
+        window.key = 6;
             break;
     }
     //全局的key
@@ -147,7 +150,7 @@ class App extends Component {
   render() {
     const { Authority } = this.state;
     const { location, children } = this.props;
-    //console.log(children.props);
+    // console.log(children.props);
     return (
       <article className="ant-layout-main">
         {/*这里左边*/}
@@ -175,6 +178,11 @@ class App extends Component {
               </Menu.Item>
               <Menu.Item key = "room">
                 <Link to="/room/main">直播间</Link>
+              </Menu.Item>
+            </SubMenu>
+            <SubMenu key = "sub4" title = {<span><Icon type="ellipsis" /><span>其他功能</span></span>}>
+              <Menu.Item key = "other">
+                <Link to="/other/ad">广告图</Link>
               </Menu.Item>
             </SubMenu>
             {

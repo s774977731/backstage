@@ -22,6 +22,7 @@ const rootRoute = {
       require('../routes/LiveRoom'),
       require('../routes/LiveRoom/newroom'),
       require('../routes/LiveRoom/roomcheck'),
+      require('../routes/Other'),
       require('../routes/Authority')
     ]
   }]

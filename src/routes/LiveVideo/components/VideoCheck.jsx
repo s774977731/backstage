@@ -366,7 +366,7 @@ class VideoCheck extends React.Component{
   //}
   onChange(e) {
     console.log(e);
-    publicParams.video_id = window.videoCheck.cid;
+    publicParams.video_id = window.record.id;
     publicParams.view_code = e;
     publicParams.service = 'Admin.SetDefaultView';
     reqwest({
@@ -392,13 +392,14 @@ class VideoCheck extends React.Component{
             <Select
               style={{ width: 100,float:'right'}}
               placeholder="请选择默认视角"
+              defaultValue={window.record ? window.record.default_view : ''}
               optionFilterProp="children"
               notFoundContent="无法找到"
               onChange={this.onChange}>
-              <Option value="0">视角一</Option>
-              <Option value="1">视角二</Option>
-              <Option value="2">视角三</Option>
-              <Option value="3">视角四</Option>
+              <Option value="1">视角一</Option>
+              <Option value="2">视角二</Option>
+              <Option value="3">视角三</Option>
+              <Option value="4">视角四</Option>
             </Select>
             <span style={{marginRight:'1rem',fontSize:'1.5rem',float:'right',paddingTop:'5px'}}>请选择默认视角:</span>
 
