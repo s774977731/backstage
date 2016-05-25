@@ -60,7 +60,7 @@ class VideoCheck extends React.Component{
     super();
     this.state = {
       visible:false,
-      conList:window.roomCheck || []
+      conList:window.roomCheck || JSON.parse(sessionStorage.roomCheck)
     };
     this.renderModal = this.renderModal.bind(this);
     this.handleOk = this.handleOk.bind(this);
