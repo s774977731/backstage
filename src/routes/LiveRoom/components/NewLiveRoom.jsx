@@ -100,9 +100,9 @@ class NewLiveRoom extends React.Component{
         dataIndex:'title',
         render:(text,record) => <div>
             <Select defaultValue={text} onChange={this.handletitlesChange.bind(this,record)} style={{ width: 90,textAlign:'center' }} >
-            <Option value="compere">主持人</Option>
-            <Option value="guest">嘉宾</Option>
-            <Option value="commentator">评论员</Option>
+            <Option value="主持人">主持人</Option>
+            <Option value="嘉宾">嘉宾</Option>
+            <Option value="评论员">评论员</Option>
             </Select>
         </div>
       }
@@ -205,6 +205,7 @@ class NewLiveRoom extends React.Component{
   }
 
   handletitlesChange(recode,value) {
+    console.log(recode,value);
     recode.change = true;
     recode.title = value;
     var hosts;
@@ -218,8 +219,6 @@ class NewLiveRoom extends React.Component{
         }
       }
     }
-
-
 
     // console.log(recode);
   }

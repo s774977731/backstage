@@ -23,53 +23,36 @@ let publicParamsJSON = sessionStorage.publicParams;
 let publicParams = JSON.parse(publicParamsJSON);
 let publicUrl = sessionStorage.publicUrl;
 
-window.deleteRoomComment = function (i) {
-  // console.log(window.roomCheck[i]);
-  publicParams.service = 'Admin.DeleteRoomContent';
-  publicParams.content_id = window.roomCheck[i].id;
-  reqwest({
-    url: publicUrl,
-    method: 'get',
-    data: publicParams,
-    type: 'jsonp',
-    withCredentials: true,
-    success: (result) => {
-      // console.log(result);
-      if(result.data.code == 0) {
-        message.success('删除直播内容成功');
-        $(`#x${i}`).fadeOut();
-      }
-    },
-    error: (err) => {
-      // console.log(err);
-      switch (err.status) {
-        case 404:
-          message.error('获取数据失败，请联系官方人员！');
-          break;
-        default:
-          message.error('获取数据失败，请刷新重试！');
-          break;
-      }
-    }
-  });
-};
-
-window.roomContent = function(i) {
-  const contentList = window.roomCheck;
-  switch (contentList[i].type) {
-    case '1':
-          return contentList[i].content+'<br/>【图片】';
-    break;
-    case '2':
-          return contentList[i].content+'<br/>【视频】';
-    break;
-    case '3':
-          return contentList[i].content+'<br/>【语音】';
-    default:
-          return contentList[i].content;
-    break;
-  }
-}
+// window.deleteRoomComment = function (i) {
+//   // console.log(window.roomCheck[i]);
+//   publicParams.service = 'Admin.DeleteRoomContent';
+//   publicParams.content_id = window.roomCheck[i].id;
+//   reqwest({
+//     url: publicUrl,
+//     method: 'get',
+//     data: publicParams,
+//     type: 'jsonp',
+//     withCredentials: true,
+//     success: (result) => {
+//       // console.log(result);
+//       if(result.data.code == 0) {
+//         message.success('删除直播内容成功');
+//         $(`#x${i}`).fadeOut();
+//       }
+//     },
+//     error: (err) => {
+//       // console.log(err);
+//       switch (err.status) {
+//         case 404:
+//           message.error('获取数据失败，请联系官方人员！');
+//           break;
+//         default:
+//           message.error('获取数据失败，请刷新重试！');
+//           break;
+//       }
+//     }
+//   });
+// };
 
 class VideoCheck extends React.Component{
 
@@ -77,7 +60,7 @@ class VideoCheck extends React.Component{
     super();
     this.state = {
       visible:false,
-      conList:window.roomCheck
+      conList:window.roomCheck || []
     };
     this.renderModal = this.renderModal.bind(this);
     this.handleOk = this.handleOk.bind(this);
@@ -85,39 +68,92 @@ class VideoCheck extends React.Component{
     this.fetch = this.fetch.bind(this);
     this.getRoomHosts = this.getRoomHosts.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
+    this.renderComments = this.renderComments.bind(this);
   }
 
   renderComments() {
+    const { conList } = this.state;
     const contentList = window.roomCheck;
-    // console.log(this.state.conList,contentList)
+    window.self = this;
+    // console.log(conList,contentList)
     var comments = '';
     if(window.roomCheck) {
       //对某用户禁言
-      for (var i=0;i<window.roomCheck.length;i++){
+      for (var i=0;i<conList.length;i++){
         comments += `
         <div id="x${i}" class="comments">
           <Row>
             <div class="col-2 commentList borderTopLeft">
-            <img style="width:20px;margin-top: 8px" src=${contentList[i].icon_url} />
+            <img style="width:20px;margin-top: 8px" src=${conList[i].icon_url} />
             </div>
             <div class="col-5 commentList" style="white-space:nowrap">
-            ${contentList[i].name}
+            ${conList[i].name}
             </div>
             <div class="col-13 commentList" style="text-align: left">
-            ${moment.unix(contentList[i].create_time).format('YYYY-MM-DD')}
+            ${moment.unix(conList[i].create_time).format('YYYY-MM-DD')}
             </div>
             <div class="col-4 commentList borderTopRight" >
-              <i onclick="window.deleteRoomComment(${i})" class="anticon anticon-delete commentListRight"></i>
+              <i onclick="window.self.deleteRoomComment(${i})" class="anticon anticon-delete commentListRight"></i>
             </div>
           </Row>
           <div style="margin-left: 10px" class="content">
-            ${window.roomContent(i)}
+            ${window.self.roomContent(i)}
           </div>
         </div>
           `
       }
     }
     return {__html: comments};
+  }
+
+  deleteRoomComment(i) {
+    const { conList } = this.state;
+    // console.log(window.roomCheck[i]);
+    publicParams.service = 'Admin.DeleteRoomContent';
+    publicParams.content_id = conList[i].id;
+    reqwest({
+      url: publicUrl,
+      method: 'get',
+      data: publicParams,
+      type: 'jsonp',
+      withCredentials: true,
+      success: (result) => {
+        // console.log(result);
+        if(result.data.code == 0) {
+          message.success('删除直播内容成功');
+          $(`#x${i}`).fadeOut();
+        }
+      },
+      error: (err) => {
+        // console.log(err);
+        switch (err.status) {
+          case 404:
+            message.error('获取数据失败，请联系官方人员！');
+            break;
+          default:
+            message.error('获取数据失败，请刷新重试！');
+            break;
+        }
+      }
+    });
+  };
+
+  roomContent(i) {
+    // const contentList = window.roomCheck;
+    const { conList } = this.state;
+    switch (conList[i].type) {
+      case '1':
+            return conList[i].content+'<br/>【图片】';
+      break;
+      case '2':
+            return conList[i].content+'<br/>【视频】';
+      break;
+      case '3':
+            return conList[i].content+'<br/>【语音】';
+      default:
+            return conList[i].content;
+      break;
+    }
   }
 
   renderModal() {
@@ -293,12 +329,21 @@ class VideoCheck extends React.Component{
   }
 
   handleScroll(e) {
+    const { conList } = this.state;
+    let i = conList.length;
     let scrollTop = $('.video-check-right').scrollTop();
-    let divHeight = $('.video-check-right').width();
-    let lastHeight = $('.comments').last().height()*3;
-    // console.log(this.lastContent)
+    let roomHeight = $('.roomHeight').height();
+    // let divHeight = $('.comments').last().position().top;
+    // let divHeight = $('.comments').last().get(0).offsetTop;
+    let lastHeight = $('.comments').height()*5+150;
 
-    if(scrollTop > divHeight+lastHeight) {
+    // let i = window.roomCheck.length;
+    this.lastContent =  conList[i-1];
+    console.log(roomHeight ,scrollTop+lastHeight)
+    console.log(this.lastContent);
+
+    if(roomHeight < scrollTop+lastHeight) {
+      // console.log(this.lastContent)
       publicParams.size = 20;
       publicParams.room_id = window.record.id;
       publicParams.from_id = '';
@@ -312,8 +357,9 @@ class VideoCheck extends React.Component{
         withCredentials: true,
         success: (result) => {
           var content = result.data.content;
-          window.roomCheck = window.roomCheck.concat(content);
-          console.log(window.roomCheck);
+          var contentLatest = conList.concat(content);
+          this.setState({ conList:contentLatest });
+          // console.log(content,conList);
         }
       })
     }
@@ -323,8 +369,6 @@ class VideoCheck extends React.Component{
       window.record = JSON.parse(sessionStorage.record);
       window.roomCheck = JSON.parse(sessionStorage.roomCheck);
       window.comments = JSON.parse(sessionStorage.comments);
-      this.lastContent =  window.roomCheck.pop();
-
   }
 
   render() {
@@ -349,7 +393,7 @@ class VideoCheck extends React.Component{
             <h2>直播列表</h2>
             <br/>
             <div className="video-check-right" id='demo' onScroll={this.handleScroll} style={{overflow:'auto'}}>
-              <div dangerouslySetInnerHTML={this.renderComments()} />
+              <div className='roomHeight' dangerouslySetInnerHTML={this.renderComments()} />
             </div>
           </Col>
           <Col span="11" offset="2">

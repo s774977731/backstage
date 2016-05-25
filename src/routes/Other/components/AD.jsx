@@ -28,17 +28,22 @@ class AD extends React.Component {
       img_url:'',
       link_url:'',
       fileListAdd:[],
-      fileListChange:[]
+      fileListChange:[],
+      enable:1,
+      second:0
     }
     this.fetch = this.fetch.bind(this);
     this.handleClickDelete = this.handleClickDelete.bind(this);
     this.addPic = this.addPic.bind(this);
     this.changePic = this.changePic.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleSecondChange = this.handleSecondChange.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.addPicChange = this.addPicChange.bind(this);
     this.changePicChange = this.changePicChange.bind(this);
     this.renderValue = this.renderValue.bind(this);
+    this.enableADButton = this.enableADButton.bind(this);
+    this.renderSecondValue = this.renderSecondValue.bind(this);
   }
 
   fetch(){
@@ -49,14 +54,15 @@ class AD extends React.Component {
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        console.log(result)
-        if(result.data.ad) {
+        console.log(result.data.ad)
+        if(result.data.ad.length > 0) {
           //getad
           let adPic = result.data.ad.img_url;
           this.setState({
             ad:result.data.ad,
             adPic:adPic,
-            disable:true
+            disable:true,
+            enable:result.data.ad.enabled,
           })
         }
       }
@@ -64,9 +70,10 @@ class AD extends React.Component {
   }
 
   handleClick() {
-    const { change, img_url, link_url, ad } = this.state;
+    const { change, img_url, link_url, ad, enable, second } = this.state;
     let value = $('#linkUrl').val();
-    console.log(!checkUrl(value));
+    let secondValue = $('#secondValue').val();
+    console.log(!checkUrl(value),secondValue);
     if(value == '') {
       message.error('请输入链接地址');
       $('#linkUrl').focus();
@@ -78,6 +85,8 @@ class AD extends React.Component {
     }
     publicParams.img_url = img_url || ad.img_url;
     publicParams.link_url = value || link_url;
+    publicParams.enable = enable;
+    publicParams.second = secondValue || second;
     if(change) {
       publicParams.ad_id = ad.id;
       publicParams.service = 'Admin.UpdateAd';
@@ -134,6 +143,7 @@ class AD extends React.Component {
       action: publicUrl+'/?service=Admin.UploadImage',
       data:publicParams,
       accept: 'image/*',
+      showUploadList:false,
       beforeUpload(file) {
         const isPic = file.type === 'image/jpeg' || file.type === 'image/png';
         const limitedSize = file.size < 2097152;
@@ -190,6 +200,7 @@ class AD extends React.Component {
       action: publicUrl+'/?service=Admin.UploadImage',
       data:publicParams,
       accept: 'image/*',
+      showUploadList:false,
       beforeUpload(file) {
         const isPic = file.type === 'image/jpeg' || file.type === 'image/png';
         const limitedSize = file.size < 2097152;
@@ -236,14 +247,15 @@ class AD extends React.Component {
     this.setState({link_url:e.target.value})
     console.log(this.state.link_url)
   }
+  handleSecondChange(e) {
+    this.setState({second:e.target.value})
+    console.log(this.state.second)
+  }
 
   renderValue() {
     const { ad, link_url } = this.state;
-
-
     // console.log(ad,link_url)
     // console.log(url,link_url,111);
-
     if(ad) {
       if(link_url) {
         return link_url
@@ -252,7 +264,31 @@ class AD extends React.Component {
     }else {
       return 'http://'
     }
+  }
+  renderSecondValue() {
+    const { ad, second } = this.state;
+    if(ad) {
+      if(second) {
+        return second
+      }
+      return ad.second
+    }else {
+      return ''
+    }
+  }
 
+  enableADButton(e) {
+    if(e.target.innerHTML == '不启用' || e.target.childNodes[0].innerHTML == '不启用') {
+      this.setState({
+        enable:0,
+      })
+      message.info('不启用该广告图');
+    }else {
+      this.setState({
+        enable:1,
+      })
+      message.info('启用该广告图');
+    }
   }
 
   componentWillMount() {
@@ -261,7 +297,7 @@ class AD extends React.Component {
   }
 
   render() {
-    const { adPic,disable, ad } = this.state;
+    const { adPic,disable, ad, enable } = this.state;
     return (
       <div >
         <Row>
@@ -273,20 +309,27 @@ class AD extends React.Component {
         </Row>
         <Row>
           <div style={{marginTop:'2rem',backgroundColor:'red'}}>
-              <div className='col-10' style={{textAlign:'right'}}>
-                {this.addPic()}
-              </div>
-              <div className='col-4' style={{textAlign:'center'}}>
-                {this.changePic()}
-              </div>
-              <div className='col-10' style={{textAlign:'left'}}>
-                <Button disabled={!disable} type='primary' size='large' onClick={this.handleClickDelete}>删除</Button>
+              <div className='col-6 col-offset-9'>
+                <div className='col-6' style={{textAlign:'center'}}>
+                  {this.addPic()}
+                </div>
+                <div className='col-6' style={{textAlign:'center'}}>
+                  {this.changePic()}
+                </div>
+                <div className='col-6' style={{textAlign:'center'}}>
+                  <Button disabled={!disable} type='primary' size='large' onClick={this.handleClickDelete}>删除</Button>
+                </div>
+                <div className='col-6' style={{textAlign:'center'}}>
+                  <Button type='primary' size='large' onClick={this.enableADButton}>{enable == 1 ? '不启用' : '启用'}</Button>
+                </div>
               </div>
           </div>
         </Row>
         <Row>
           <div className='col-10 col-offset-7' style={{textAlign:'center',marginTop:'2rem'}}>
             <Input type='text' style={{width:'400px',height:'35px'}} placeholder='请输入链接地址，以http://开头' value={this.renderValue()} onChange={this.handleInputChange}  id='linkUrl'></Input>
+            <br/>
+            <Input type='text' style={{width:'400px',height:'35px',marginTop:'2rem'}} placeholder='请输入广告播放的秒数，以秒为单位' value={this.renderSecondValue()}  onChange={this.handleSecondChange} id='secondValue'></Input>
             <br/>
             <Button style={{width:'400px',marginTop:'2rem'}} type='primary' size='large' onClick={this.handleClick}>保存修改</Button>
           </div>

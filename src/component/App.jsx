@@ -26,10 +26,10 @@ var publicParams = {};
 publicParams.app = 1;
 publicParams.t = timestamp;
 publicParams.sign=md5(timestamp+'lowkey');
- // publicParams.user_id=64;
- // publicParams.token='87d98cc75ed4145a1f3eeb05fb7f0d77';
-publicParams.user_id = sessionStorage.user_id;
-publicParams.token = sessionStorage.token;
+ publicParams.user_id=64;
+ publicParams.token='9b0fba2eff7c3b0d78629235a97b0b9d';
+// publicParams.user_id = sessionStorage.user_id;
+// publicParams.token = sessionStorage.token;
 
 var publicParamsJSON = JSON.stringify(publicParams);
 sessionStorage.publicParams = publicParamsJSON;
@@ -183,6 +183,9 @@ class App extends Component {
             <SubMenu key = "sub4" title = {<span><Icon type="ellipsis" /><span>其他功能</span></span>}>
               <Menu.Item key = "other">
                 <Link to="/other/ad">广告图</Link>
+              </Menu.Item>
+              <Menu.Item key = "addapp">
+                <Link to="/addapp">发布新版安卓</Link>
               </Menu.Item>
             </SubMenu>
             {
