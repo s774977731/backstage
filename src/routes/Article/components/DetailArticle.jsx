@@ -53,6 +53,7 @@ class DetailArticle extends React.Component{
     window.article = JSON.parse(sessionStorage.article);
     window.comments = JSON.parse(sessionStorage.comments);
     //console.log(window.article,22222)
+    console.log(window.comments);
   }
 
   render() {

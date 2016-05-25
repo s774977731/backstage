@@ -143,7 +143,7 @@ class AD extends React.Component {
       action: publicUrl+'/?service=Admin.UploadImage',
       data:publicParams,
       accept: 'image/*',
-      showUploadList:false,
+      // showUploadList:false,
       beforeUpload(file) {
         const isPic = file.type === 'image/jpeg' || file.type === 'image/png';
         const limitedSize = file.size < 2097152;
@@ -200,7 +200,7 @@ class AD extends React.Component {
       action: publicUrl+'/?service=Admin.UploadImage',
       data:publicParams,
       accept: 'image/*',
-      showUploadList:false,
+      // showUploadList:false,
       beforeUpload(file) {
         const isPic = file.type === 'image/jpeg' || file.type === 'image/png';
         const limitedSize = file.size < 2097152;

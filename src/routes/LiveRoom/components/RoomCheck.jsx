@@ -369,6 +369,7 @@ class VideoCheck extends React.Component{
       window.record = JSON.parse(sessionStorage.record);
       window.roomCheck = JSON.parse(sessionStorage.roomCheck);
       window.comments = JSON.parse(sessionStorage.comments);
+      console.log(window.comments);
   }
 
   render() {
@@ -392,7 +393,7 @@ class VideoCheck extends React.Component{
           <Col span="11">
             <h2>直播列表</h2>
             <br/>
-            <div className="video-check-right" id='demo' onScroll={this.handleScroll} style={{overflow:'auto'}}>
+            <div className="video-check-right" onScroll={this.handleScroll} style={{overflow:'auto'}}>
               <div className='roomHeight' dangerouslySetInnerHTML={this.renderComments()} />
             </div>
           </Col>

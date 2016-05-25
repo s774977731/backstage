@@ -53,6 +53,7 @@ class VideoCheck extends React.Component{
   }
   componentWillMount() {
     //var code = getStats(window.videoCheck,'view_code');
+    console.log(window.comments);
     window.record = JSON.parse(sessionStorage.record);
     window.videoCheck = JSON.parse(sessionStorage.videoCheck);
     window.comments = JSON.parse(sessionStorage.comments);
