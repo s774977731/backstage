@@ -30,7 +30,9 @@ class AD extends React.Component {
       fileListAdd:[],
       fileListChange:[],
       enable:1,
-      second:0
+      second:0,
+      inputChange:false,
+      inputSecondChange:false
     }
     this.fetch = this.fetch.bind(this);
     this.handleClickDelete = this.handleClickDelete.bind(this);
@@ -244,36 +246,44 @@ class AD extends React.Component {
   }
 
   handleInputChange(e) {
-    this.setState({link_url:e.target.value})
+    this.setState({
+      link_url:e.target.value,
+      inputChange:true
+    })
     console.log(this.state.link_url)
   }
   handleSecondChange(e) {
-    this.setState({second:e.target.value})
+    this.setState({
+      second:e.target.value,
+      inputSecondChange:true
+    })
     console.log(this.state.second)
   }
 
   renderValue() {
-    const { ad, link_url } = this.state;
+    const { ad, link_url,inputChange } = this.state;
     // console.log(ad,link_url)
     // console.log(url,link_url,111);
     if(ad) {
-      if(link_url) {
+      if(inputChange) {
         return link_url
+      }else {
+        return ad.link_url
       }
-      return ad.link_url
     }else {
-      return 'http://'
+      return link_url
     }
   }
   renderSecondValue() {
-    const { ad, second } = this.state;
+    const { ad, second, inputSecondChange } = this.state;
     if(ad) {
-      if(second) {
+      if(inputSecondChange) {
         return second
+      }else {
+        return ad.second
       }
-      return ad.second
     }else {
-      return ''
+      return second
     }
   }
 

@@ -50,7 +50,9 @@ class NewArticle extends React.Component{
         status: 'done',
         url: window.article.image_url,
       }] : [],
-      img_url:''
+      img_url:'',
+      articleTitle:'',
+      inputChange:false
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     //this.showModal = this.showModal.bind(this);
@@ -235,8 +237,11 @@ class NewArticle extends React.Component{
   }
 
   hangleTitleChange(e) {
-    // console.log(e.target.value);
-    this.setState({articleTitle:e.target.value});
+    console.log(e.target.value);
+    this.setState({
+      articleTitle:e.target.value,
+      inputChange:true
+    });
   }
 
   handleLinkChange(e) {
@@ -260,14 +265,16 @@ class NewArticle extends React.Component{
   }
 
   renderArticleName() {
-    const { articleTitle } = this.state;
+    const { articleTitle, inputChange } = this.state;
+
     if(window.article) {
-      if(articleTitle) {
-        return articleTitle;
-      }
-      return window.article.article_title;
-    }else {
+      if(inputChange) {
         return articleTitle
+      }else {
+        return window.article.article_title;
+      }
+    }else {
+        return ''
     }
   }
 

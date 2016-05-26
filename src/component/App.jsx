@@ -27,7 +27,7 @@ publicParams.app = 1;
 publicParams.t = timestamp;
 publicParams.sign=md5(timestamp+'lowkey');
 // publicParams.user_id=64;
-// publicParams.token='3fb06df21a51159dd5476c588a32d8fd';
+// publicParams.token='84165bddc4297aecf49eea950c718e26';
 publicParams.user_id = sessionStorage.user_id;
 publicParams.token = sessionStorage.token;
 

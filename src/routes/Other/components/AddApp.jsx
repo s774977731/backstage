@@ -25,7 +25,10 @@ class AddApp extends React.Component {
       android:{},
       input1:'',
       input2:'',
-      input3:''
+      input3:'',
+      inputChange1:false,
+      inputChange2:false,
+      inputChange3:false
     }
     this.fetch = this.fetch.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -90,23 +93,23 @@ class AddApp extends React.Component {
   }
 
   renderValue(num) {
-    const { android, input1, input2, input3 } = this.state;
+    const { android, input1, input2, input3, inputChange1, inputChange2, inputChange3 } = this.state;
     if(num == 1) {
       if(android) {
-        if(input1) {
+        if(inputChange1) {
           return input1
         }
         return android.version_name
       }
     }
     if(num == 2) {
-        if(input2) {
+        if(inputChange2) {
           return input2
         }
         return android.version_code
     }
     if(num == 3) {
-        if(input3) {
+        if(inputChange3) {
           return input3
         }
         return android.download_url
@@ -118,13 +121,22 @@ class AddApp extends React.Component {
   handleChange(num,e) {
     console.log(num,e);
     if(num == 1) {
-      this.setState({input1:e.target.value})
+      this.setState({
+        input1:e.target.value,
+        inputChange1:true
+      })
     }
     if(num == 2) {
-      this.setState({input2:e.target.value})
+      this.setState({
+        input2:e.target.value,
+        inputChange2:true
+      })
     }
     if(num == 3) {
-      this.setState({input3:e.target.value})
+      this.setState({
+        input3:e.target.value,
+        inputChange3:true
+      })
     }
   }
 
