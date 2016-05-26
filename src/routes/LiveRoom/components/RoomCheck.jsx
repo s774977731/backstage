@@ -58,6 +58,7 @@ class VideoCheck extends React.Component{
 
   constructor() {
     super();
+    this.autoload = false;
     this.state = {
       visible:false,
       conList:window.roomCheck || JSON.parse(sessionStorage.roomCheck)
@@ -69,6 +70,7 @@ class VideoCheck extends React.Component{
     this.getRoomHosts = this.getRoomHosts.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
     this.renderComments = this.renderComments.bind(this);
+    this.getRoomList = this.getRoomList.bind(this);
   }
 
   renderComments() {
@@ -339,10 +341,11 @@ class VideoCheck extends React.Component{
 
     // let i = window.roomCheck.length;
     this.lastContent =  conList[i-1];
-    console.log(roomHeight ,scrollTop+lastHeight)
-    console.log(this.lastContent);
+    // console.log(roomHeight ,scrollTop+lastHeight)
+    // console.log(this.lastContent);
 
     if(roomHeight < scrollTop+lastHeight) {
+      this.autoload = true;
       // console.log(this.lastContent)
       publicParams.size = 20;
       publicParams.room_id = window.record.id;
@@ -364,12 +367,36 @@ class VideoCheck extends React.Component{
       })
     }
   }
+  getRoomList() {
+    publicParams.service = 'Admin.GetRoomContent';
+    publicParams.room_id = window.record.id;
+    reqwest({
+      url: publicUrl,
+      method: 'get',
+      data: publicParams,
+      type: 'jsonp',
+      withCredentials: true,
+      success: (result) => {
+        // console.log(result.data);
+        this.setState({
+          conList:result.data.content,
+        })
+      }
+    })
+  }
 
   componentWillMount() {
       window.record = JSON.parse(sessionStorage.record);
       window.roomCheck = JSON.parse(sessionStorage.roomCheck);
       window.comments = JSON.parse(sessionStorage.comments);
-      console.log(window.comments);
+  }
+  componentDidMount() {
+    setInterval((function() {
+      if(this.autoload) {
+        return;
+      }
+      this.getRoomList();
+    }.bind(this)), 10000)
   }
 
   render() {

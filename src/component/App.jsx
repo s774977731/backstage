@@ -26,14 +26,16 @@ var publicParams = {};
 publicParams.app = 1;
 publicParams.t = timestamp;
 publicParams.sign=md5(timestamp+'lowkey');
-publicParams.user_id=64;
-publicParams.token='9e2bac0a2b5a509987a6d76189143d9b';
-// publicParams.user_id = sessionStorage.user_id;
-// publicParams.token = sessionStorage.token;
+// publicParams.user_id=64;
+// publicParams.token='3fb06df21a51159dd5476c588a32d8fd';
+publicParams.user_id = sessionStorage.user_id;
+publicParams.token = sessionStorage.token;
 
 var publicParamsJSON = JSON.stringify(publicParams);
 sessionStorage.publicParams = publicParamsJSON;
 sessionStorage.publicUrl = publicUrl;
+sessionStorage.t = publicParams.t;
+sessionStorage.sign = publicParams.sign;
 
 
 class App extends Component {
@@ -57,12 +59,15 @@ class App extends Component {
             break;
       case 'article':
         window.key = 2;
+        sessionStorage.keys = 2;
             break;
       case 'video':
         window.key = 3;
+        sessionStorage.keys = 3;
             break;
       case 'room':
         window.key = 4;
+        sessionStorage.keys = 4;
             break;
       case 'other':
         window.key = 5;

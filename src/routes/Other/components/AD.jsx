@@ -54,8 +54,8 @@ class AD extends React.Component {
       type: 'jsonp',
       withCredentials: true,
       success: (result) => {
-        console.log(result.data.ad)
-        if(result.data.ad.length > 0) {
+        console.log(result.data)
+        if(result.data.ad.id > 0) {
           //getad
           let adPic = result.data.ad.img_url;
           this.setState({

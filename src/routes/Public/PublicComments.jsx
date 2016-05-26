@@ -51,7 +51,7 @@ function getComments () {
     type: 'jsonp',
     success: (result) => {
       window.comments = result.data.comments;
-      console.log(result.data.comments);
+      // console.log(result.data.comments);
     }
   });
 }
@@ -81,7 +81,7 @@ function getSearchComment() {
     type: 'jsonp',
     success: (result) => {
       sessionStorage.searchContent = JSON.stringify(result.data.comments);
-      console.log(JSON.parse(sessionStorage.searchContent));
+      // console.log(JSON.parse(sessionStorage.searchContent));
     }
   });
 }
@@ -91,6 +91,8 @@ class PublicComments extends React.Component{
 
   constructor() {
     super();
+    this.autoload = false;
+    this.search = false;
     this.state = {
       serchContent:[],
       commentItems:window.comments,
@@ -98,6 +100,7 @@ class PublicComments extends React.Component{
     this.handleSubmit = this.handleSubmit.bind(this);
     this.renderComments = this.renderComments.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
+    this.getCommentsList = this.getCommentsList.bind(this);
   }
 
   fetch() {
@@ -113,11 +116,11 @@ class PublicComments extends React.Component{
             serchContent:result.data.comments
           });
           sessionStorage.searchContent = JSON.stringify(result.data.comments);
-          console.log(JSON.parse(sessionStorage.searchContent))
+          // console.log(JSON.parse(sessionStorage.searchContent))
         }
       },
       error: (err) => {
-        console.log(err);
+        // console.log(err);
         this.setState({ loading: false });
         switch (err.status) {
           case 404:
@@ -133,6 +136,8 @@ class PublicComments extends React.Component{
 
   handleSubmit(e) {
     e.preventDefault();
+    this.search = true;
+    this.autoload = true;
     let formValue = this.props.form.getFieldsValue();
     console.log('收到表单值：', this.props.form.getFieldsValue());
     //console.log(window.record);
@@ -190,7 +195,7 @@ class PublicComments extends React.Component{
     }
     if(window.comments) {
       //对某用户禁言
-      for (var i=0;i<window.comments.length;i++)
+      for (var i=0;i<commentItems.length;i++)
       {
         comments += `
         <div id="y${i}" class="comments">
@@ -290,7 +295,7 @@ class PublicComments extends React.Component{
       data: publicParams,
       type: 'jsonp',
       success: (result) => {
-        console.log(result);
+        // console.log(result);
         if(result.data.code == 0) {
           setTimeout(function () {
             var auditNumber;
@@ -336,9 +341,10 @@ class PublicComments extends React.Component{
     let roomHeight = $('.roomHeight').height();
     let lastHeight = $('.comments').height()*5+150;
     this.lastContent =  commentItems[i-1];
-    console.log(roomHeight ,scrollTop+lastHeight,this.lastContent,window.record)
+    // console.log(roomHeight ,scrollTop+lastHeight,this.lastContent,window.record)
     if(roomHeight < scrollTop+lastHeight) {
       // console.log(this.lastContent)
+      this.autoload = true;
       if(window.key == 2) {
         publicParams.id = window.record.article_id;
       }else {
@@ -365,6 +371,35 @@ class PublicComments extends React.Component{
     }
   }
 
+  getCommentsList() {
+    publicParams.service = 'Admin.GetCommentsByFlow';
+    publicParams.type = window.key - 1;
+    publicParams.size = 20;
+    if(window.key == 2) {
+      publicParams.id = window.record.article_id;
+    }else {
+      publicParams.id = window.record.id;
+    }
+    reqwest({
+      url: publicUrl,
+      method: 'get',
+      data: publicParams,
+      type: 'jsonp',
+      withCredentials: true,
+      success: (result) => {
+        // console.log(result.data.comments,publicParams);
+        this.setState({
+          commentItems:result.data.comments,
+        })
+      }
+    })
+  }
+
+  componentWillMount() {
+    window.key = sessionStorage.keys;
+    // console.log(sessionStorage.keys)
+  }
+
   componentDidMount() {
     let comments = window.comments;
     if(comments) {
@@ -374,6 +409,12 @@ class PublicComments extends React.Component{
           }
         }
     }
+    setInterval((function() {
+      if(this.autoload) {
+        return;
+      }
+      this.getCommentsList();
+    }.bind(this)), 10000)
   }
 
   render() {
